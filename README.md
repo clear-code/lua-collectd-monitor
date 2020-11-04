@@ -7,12 +7,12 @@ A collectd plugin written in Lua, it provides monitoring feature.
 * At first, you need to install customized version of collectd
   * https://github.com/clear-code/collectd/tree/cc-luajit
 * Download and install lua-collectd-monitor:
-```
+```shell
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
 * Add the following config to your collectd.conf
-```
+```xml
 <LoadPlugin lua>
   Globals true
 </LoadPlugin>
