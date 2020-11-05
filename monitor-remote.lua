@@ -6,8 +6,14 @@ local mqtt_config
 local mqtt_thread
 local mqtt_thread_pipe
 
+local DEBUG  = collectd.log_debug
+local ERROR  = collectd.log_error
+local INFO   = collectd.log_info
+local NOTICE = collectd.log_notice
+local WARN   = collectd.log_warning
+
 function config(conf)
-   print("monitor-remote.lua: config")
+   DEBUG("monitor-remote.lua: config")
    mqtt_config = conf
    return 0
 end
@@ -90,7 +96,7 @@ function init()
 end
 
 function shutdown()
-   print("monitor-remote.lua: shutdown")
+   DEBUG("monitor-remote.lua: shutdown")
    mqtt_thread_pipe:write("finish\n")
    mqtt_thread:join()
    return 0
