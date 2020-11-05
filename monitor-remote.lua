@@ -92,11 +92,6 @@ function init()
    return 0
 end
 
-function read()
-   print("monitor-remote.lua: read")
-   return 0
-end
-
 function shutdown()
    print("monitor-remote.lua: shutdown")
    mqtt_thread_pipe:write("finish\n")
@@ -108,4 +103,3 @@ end
 collectd.register_config(config)
 collectd.register_init(init)
 collectd.register_shutdown(shutdown)
-collectd.register_read(read)
