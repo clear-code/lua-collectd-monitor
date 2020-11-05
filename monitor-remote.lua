@@ -1,7 +1,7 @@
 local inspect = require('inspect')
 local mqtt = require('mqtt')
 local cqueues = require('cqueues')
-local thread = require("cqueues.thread")
+local thread = require('cqueues.thread')
 local conf
 
 function config(self)
