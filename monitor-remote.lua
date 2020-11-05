@@ -2,26 +2,23 @@ local inspect = require('inspect')
 local mqtt = require('mqtt')
 local cqueues = require('cqueues')
 local thread = require('cqueues.thread')
-local conf
-
-function config(self)
-   print("monitor-remote.lua: config")
-   conf = self
-   return 0
-end
-
+local mqtt_config
 local mqtt_thread
 local mqtt_thread_pipe
 
-function thread_func(conn, host, user, password, topic)
+function config(conf)
+   print("monitor-remote.lua: config")
+   mqtt_config = conf
+   return 0
+end
+
+function mqtt_thread_func(conn, host, user, password, topic)
    local inspect = require('inspect')
    local mqtt = require('mqtt')
    local cqueues = require("cqueues")
    local cq = cqueues.new()
-   local client
    local loop = mqtt.get_ioloop()
-
-   client = mqtt.client {
+   local client = mqtt.client {
       uri = host,
       username = user,
       password = password,
@@ -82,13 +79,13 @@ function thread_func(conn, host, user, password, topic)
 end
 
 function init()
+   local conf = mqtt_config
    mqtt_thread, mqtt_thread_pipe =
-      thread.start(thread_func,
+      thread.start(mqtt_thread_func,
 		   conf.Host,
 		   conf.User,
 		   conf.Password,
 		   conf.CommandTopic)
-   mqtt_thread_pipe:write("started\n")
    return 0
 end
 
