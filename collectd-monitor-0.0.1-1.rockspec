@@ -15,6 +15,7 @@ dependencies = {
     "inspect >= 3.1.1",
     "luamqtt >= 3.4.1",
     "cqueues >= 20200726.51",
+    "lunajson >= 1.2.3",
 }
 build = {
     type = "builtin",

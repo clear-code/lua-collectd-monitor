@@ -2,7 +2,8 @@ local inspect = require('inspect')
 local mqtt = require('mqtt')
 local cqueues = require('cqueues')
 local thread = require('cqueues.thread')
-local mqtt_config
+local lunajson = require('lunajson')
+local mqtt_config_json
 local mqtt_thread
 local mqtt_thread_pipe
 
@@ -14,20 +15,22 @@ local WARN   = collectd.log_warning
 
 function config(conf)
    DEBUG("monitor-remote.lua: config")
-   mqtt_config = conf
+   mqtt_config_json = lunajson.encode(conf)
    return 0
 end
 
-function mqtt_thread_func(conn, host, user, password, topic)
+function mqtt_thread_func(conn, config_json)
    local inspect = require('inspect')
    local mqtt = require('mqtt')
    local cqueues = require("cqueues")
+   local lunajson = require('lunajson')
+   local conf = lunajson.decode(config_json)
    local cq = cqueues.new()
    local loop = mqtt.get_ioloop()
    local client = mqtt.client {
-      uri = host,
-      username = user,
-      password = password,
+      uri = conf.Host,
+      username = conf.User,
+      password = conf.Password,
       clean = true,
    }
    client:on {
@@ -38,7 +41,7 @@ function mqtt_thread_func(conn, host, user, password, topic)
 	 end
 
 	 subscribe_options = {
-	    topic = topic,
+	    topic = conf.CommandTopic,
 	 }
 	 assert(client:subscribe(subscribe_options))
       end,
@@ -87,11 +90,7 @@ end
 function init()
    local conf = mqtt_config
    mqtt_thread, mqtt_thread_pipe =
-      thread.start(mqtt_thread_func,
-		   conf.Host,
-		   conf.User,
-		   conf.Password,
-		   conf.CommandTopic)
+      thread.start(mqtt_thread_func, mqtt_config_json)
    return 0
 end
 
