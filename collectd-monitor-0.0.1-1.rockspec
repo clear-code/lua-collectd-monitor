@@ -14,6 +14,7 @@ dependencies = {
     "lua >= 5.1",
     "inspect >= 3.1.1",
     "luamqtt >= 3.4.1",
+    "cqueues >= 20200726.51",
 }
 build = {
     type = "builtin",

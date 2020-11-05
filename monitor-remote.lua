@@ -1,20 +1,33 @@
 local inspect = require('inspect')
 local mqtt = require('mqtt')
+local cqueues = require('cqueues')
+local thread = require("cqueues.thread")
+local conf
 
-local mqtt_client
-local mqtt_loop = mqtt.get_ioloop()
-local mqtt_handled = false
-
-function config(conf)
+function config(self)
    print("monitor-remote.lua: config")
+   conf = self
+   return 0
+end
 
-   mqtt_client = mqtt.client {
-      uri = conf.Host,
-      username = conf.User,
-      password = conf.Password,
+local mqtt_thread
+local mqtt_thread_pipe
+
+function thread_func(conn, host, user, password, topic)
+   local inspect = require('inspect')
+   local mqtt = require('mqtt')
+   local cqueues = require("cqueues")
+   local cq = cqueues.new()
+   local client
+   local loop = mqtt.get_ioloop()
+
+   client = mqtt.client {
+      uri = host,
+      username = user,
+      password = password,
       clean = true,
    }
-   mqtt_client:on {
+   client:on {
       connect = function(reply)
 	 if reply.rc ~= 0 then
 	    print("Failed to connect to broker: ",
@@ -22,73 +35,72 @@ function config(conf)
 	 end
 
 	 subscribe_options = {
-	    topic = conf.CommandTopic,
+	    topic = topic,
 	 }
-	 assert(mqtt_client:subscribe(subscribe_options))
-
-	 mqtt_handled = true
+	 assert(client:subscribe(subscribe_options))
       end,
 
       subscribe = function(reply)
 	 print(inspect(reply))
-	 mqtt_handled = true
       end,
 
       unsubscribe = function(reply)
 	 print(inspect(reply))
-	 mqtt_handled = true
       end,
 
       message = function(msg)
-	 assert(mqtt_client:acknowledge(msg))
+	 assert(client:acknowledge(msg))
 	 print("received message", msg)
-	 mqtt_handled = true
       end,
 
       acknowledge = function()
 	 print("acknowledge")
-	 mqtt_handled = true
       end,
 
       error = function()
 	 print("error")
-	 mqtt_handled = true
       end,
 
       close = function()
 	 print("close")
-	 mqtt_handled = true
       end,
 
       auth = function()
 	 print("auth")
-	 mqtt_handled = true
       end,
    }
 
-   return 0
+   loop:add(client)
+   while true do
+      loop:iteration()
+      line, why = conn:recv("*L", "t", 1000)
+      if line == "finish\n" then
+	 break
+      end
+   end
+   print("thread finished")
 end
 
 function init()
-   mqtt_loop:add(mqtt_client)
+   mqtt_thread, mqtt_thread_pipe =
+      thread.start(thread_func,
+		   conf.Host,
+		   conf.User,
+		   conf.Password,
+		   conf.CommandTopic)
+   mqtt_thread_pipe:write("started\n")
    return 0
 end
 
 function read()
    print("monitor-remote.lua: read")
-   while true do
-      mqtt_loop:iteration()
-      if not mqtt_handled then
-	 break
-      end
-      mqtt_handled = false
-   end
    return 0
 end
 
 function shutdown()
    print("monitor-remote.lua: shutdown")
-   mqtt_loop:remove(mqtt_client)
+   mqtt_thread_pipe:write("finish\n")
+   mqtt_thread:join()
    return 0
 end
 
