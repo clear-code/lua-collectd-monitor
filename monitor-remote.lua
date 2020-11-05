@@ -73,7 +73,7 @@ function thread_func(conn, host, user, password, topic)
    loop:add(client)
    while true do
       loop:iteration()
-      line, why = conn:recv("*L", "t", 1000)
+      line, why = conn:recv("*L", "t")
       if line == "finish\n" then
 	 break
       end
