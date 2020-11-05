@@ -19,7 +19,7 @@ function config(conf)
    return 0
 end
 
-function mqtt_thread_func(conn, config_json)
+function mqtt_thread_func(pipe, config_json)
    local inspect = require('inspect')
    local mqtt = require('mqtt')
    local cqueues = require("cqueues")
@@ -79,7 +79,7 @@ function mqtt_thread_func(conn, config_json)
    loop:add(client)
    while true do
       loop:iteration()
-      line, why = conn:recv("*L", "t")
+      line, why = pipe:recv("*L", "t")
       if line == "finish\n" then
 	 break
       end
