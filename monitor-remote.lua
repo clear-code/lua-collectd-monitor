@@ -32,7 +32,7 @@ function mqtt_thread_func(pipe, config_json)
       username = conf.User,
       password = conf.Password,
       secure = conf.Secure,
-      clean = true,
+      clean = conf.CleanSession,
    }
    client:on {
       connect = function(reply)
