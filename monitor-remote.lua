@@ -31,6 +31,7 @@ function mqtt_thread_func(pipe, config_json)
       uri = conf.Host,
       username = conf.User,
       password = conf.Password,
+      secure = conf.Secure,
       clean = true,
    }
    client:on {
