@@ -84,6 +84,8 @@ function mqtt_thread_func(pipe, config_json)
 	 break
       end
    end
+   client:disconnect()
+   loop:remove(client)
    print("thread finished")
 end
 
