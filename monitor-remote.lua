@@ -35,20 +35,52 @@ function mqtt_thread_func(pipe, config_json)
       clean = conf.CleanSession,
    }
 
+   function get_log_level()
+      local level = string.lower(conf.LogLevel or "warn")
+      if level == "debug" then
+         return 7
+      elseif level == "info" then
+         return 6
+      elseif level == "notice" then
+         return 5
+      elseif level == "warn" or level == "warning"then
+         return 4
+      elseif level == "err" or level == "error" then
+         return 3
+      elseif level == "crit" or level == "critical" then
+         return 2
+      elseif level == "alert" then
+         return 1
+      elseif level == "emerg" then
+         return 0
+      end
+      return 4
+   end
+
+   local log_level = get_log_level()
+
    function debug(...)
-      print(...)
+      if (log_level >= 7) then
+         print(...)
+      end
    end
 
    function info(...)
-      print(...)
+      if (log_level <= 6) then
+         print(...)
+      end
    end
 
    function warn(...)
-      print(...)
+      if (log_level <= 4) then
+         print(...)
+      end
    end
 
    function error(...)
-      print(...)
+      if (log_level <= 3) then
+         print(...)
+      end
    end
 
    client:on {
@@ -56,6 +88,7 @@ function mqtt_thread_func(pipe, config_json)
          if reply.rc ~= 0 then
             print("Failed to connect to broker: ",
                   reply:reason_string(), reply)
+            return
          end
 
          subscribe_options = {
