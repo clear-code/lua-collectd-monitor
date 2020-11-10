@@ -27,8 +27,8 @@ local client = mqtt.client {
 client:on {
    connect = function(reply)
       if reply.rc ~= 0 then
-         print("Failed to connect to broker: ",
-               reply:reason_string(), reply)
+         io.stderr:write("Failed to connect to broker: ",
+                         reply:reason_string(), "\n")
          return
       end
 
@@ -51,7 +51,7 @@ client:on {
    end,
 
    error = function(msg)
-      print(msg)
+      io.stderr:write(msg, "\n")
    end,
 }
 
