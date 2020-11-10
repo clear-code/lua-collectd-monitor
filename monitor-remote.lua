@@ -34,6 +34,23 @@ function mqtt_thread_func(pipe, config_json)
       secure = conf.Secure,
       clean = conf.CleanSession,
    }
+
+   function debug(...)
+      print(...)
+   end
+
+   function info(...)
+      print(...)
+   end
+
+   function warn(...)
+      print(...)
+   end
+
+   function error(...)
+      print(...)
+   end
+
    client:on {
       connect = function(reply)
 	 if reply.rc ~= 0 then
@@ -47,33 +64,33 @@ function mqtt_thread_func(pipe, config_json)
 	 assert(client:subscribe(subscribe_options))
       end,
 
-      subscribe = function(reply)
-	 print(inspect(reply))
+      subscribe = function(packet)
+	 debug("MQTT subscribe callback:", inspect(packet))
       end,
 
-      unsubscribe = function(reply)
-	 print(inspect(reply))
+      unsubscribe = function(packet)
+	 debug("MQTT unsubscribe callback:", inspect(reply))
       end,
 
       message = function(msg)
 	 assert(client:acknowledge(msg))
-	 print("received message", msg)
+	 debug("received message", msg)
       end,
 
-      acknowledge = function()
-	 print("acknowledge")
+      acknowledge = function(packet)
+	 debug("MQTT acknowledge callback:", ispect(packet))
       end,
 
-      error = function()
-	 print("error")
+      error = function(msg)
+	 warn("MQTT client error:", msg)
       end,
 
-      close = function()
-	 print("close")
+      close = function(connection)
+	 debug("MQTT connection closed:", connection.close_reason)
       end,
 
-      auth = function()
-	 print("auth")
+      auth = function(packet)
+	 debug("MQTT auth callback:", packet)
       end,
    }
 
@@ -87,7 +104,7 @@ function mqtt_thread_func(pipe, config_json)
    end
    client:disconnect()
    loop:remove(client)
-   print("thread finished")
+   info("MQTT thread finished")
 end
 
 function init()
