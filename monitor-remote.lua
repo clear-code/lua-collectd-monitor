@@ -91,11 +91,15 @@ function mqtt_thread_func(pipe, config_json)
             return
          end
 
-         subscribe_options = {
+         local subscribe_options = {
             topic = conf.CommandTopic,
             qos = conf.QoS,
          }
-         assert(client:subscribe(subscribe_options))
+
+         local packet_id, err = client:subscribe(subscribe_options)
+         if not packet_id then
+            error("Failed to subscribe:", err)
+         end
       end,
 
       subscribe = function(packet)
@@ -106,17 +110,21 @@ function mqtt_thread_func(pipe, config_json)
          debug("MQTT unsubscribe callback:", inspect(reply))
       end,
 
-      message = function(msg)
-         debug("received message", msg)
+      message = function(packet)
+         debug("received message", packet)
 
-         assert(client:acknowledge(msg))
-
-         local succeeded, result = pcall(lunajson.decode, msg.payload)
-         if not succeeded or not result or not result.command then
-            error("Failed to decode MQTT message:", result)
+         local succeeded, msg = client:acknowledge(packet)
+         if not succeeded then
+            error("Failed to acknowledge:", msg)
             return
          end
-         debug("Received command:", result.command)
+
+         succeeded, msg = pcall(lunajson.decode, packet.payload)
+         if not succeeded or not msg or not msg.command then
+            error("Failed to decode MQTT message:", msg)
+            return
+         end
+         debug("Received command:", msg.command)
       end,
 
       acknowledge = function(packet)
