@@ -17,7 +17,7 @@ $ sudo luarocks make
   Globals true
 </LoadPlugin>
 <Plugin lua>
-  BasePath "/usr/local/share/lua/5.1/collectd-monitor/"
+  BasePath "/usr/local/share/lua/5.1/collectd/"
   Script "monitor-remote.lua"
     <Module "monitor-remote">
       Host "localhost"
