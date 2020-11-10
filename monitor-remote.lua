@@ -165,7 +165,7 @@ function mqtt_thread_func(pipe, config_json)
       end,
 
       auth = function(packet)
-         debug("MQTT auth callback:", packet)
+         debug("MQTT auth callback:", inspect(packet))
       end,
    }
 
