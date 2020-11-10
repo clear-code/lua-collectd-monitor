@@ -53,44 +53,44 @@ function mqtt_thread_func(pipe, config_json)
 
    client:on {
       connect = function(reply)
-	 if reply.rc ~= 0 then
-	    print("Failed to connect to broker: ",
+         if reply.rc ~= 0 then
+            print("Failed to connect to broker: ",
                   reply:reason_string(), reply)
-	 end
+         end
 
-	 subscribe_options = {
-	    topic = conf.CommandTopic,
-	 }
-	 assert(client:subscribe(subscribe_options))
+         subscribe_options = {
+            topic = conf.CommandTopic,
+         }
+         assert(client:subscribe(subscribe_options))
       end,
 
       subscribe = function(packet)
-	 debug("MQTT subscribe callback:", inspect(packet))
+         debug("MQTT subscribe callback:", inspect(packet))
       end,
 
       unsubscribe = function(packet)
-	 debug("MQTT unsubscribe callback:", inspect(reply))
+         debug("MQTT unsubscribe callback:", inspect(reply))
       end,
 
       message = function(msg)
-	 assert(client:acknowledge(msg))
-	 debug("received message", msg)
+         assert(client:acknowledge(msg))
+         debug("received message", msg)
       end,
 
       acknowledge = function(packet)
-	 debug("MQTT acknowledge callback:", ispect(packet))
+         debug("MQTT acknowledge callback:", ispect(packet))
       end,
 
       error = function(msg)
-	 warn("MQTT client error:", msg)
+         warn("MQTT client error:", msg)
       end,
 
       close = function(connection)
-	 debug("MQTT connection closed:", connection.close_reason)
+         debug("MQTT connection closed:", connection.close_reason)
       end,
 
       auth = function(packet)
-	 debug("MQTT auth callback:", packet)
+         debug("MQTT auth callback:", packet)
       end,
    }
 
@@ -99,7 +99,7 @@ function mqtt_thread_func(pipe, config_json)
       loop:iteration()
       line, why = pipe:recv("*L", "t")
       if line == "finish\n" then
-	 break
+         break
       end
    end
    client:disconnect()
