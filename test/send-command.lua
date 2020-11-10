@@ -9,7 +9,7 @@ local conf = {
    secure = false,
    CleanSession = false,
    CommandTopic = "test-topic",
-   QoS = 1,
+   QoS = 0,
    Command = "Command",
 }
 
