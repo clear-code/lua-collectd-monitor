@@ -29,7 +29,7 @@ function mqtt_thread_func(pipe, config_json)
    local log_device = string.lower(conf.LogDevice or "syslog")
    if log_device == "stdout" or log_device == "console" then
       require('logging.console')
-      logger = logging.console({})
+      logger = logging.console()
    else
       require('logging.syslog')
       logger = logging.syslog("collectd-monitor-remote")
