@@ -86,11 +86,11 @@ function mqtt_thread_func(pipe, config_json)
       end
 
       if not monitor_settings["commands"][command] then
-         error("Cannot find command:", command)
+         error("Cannot find command: ", command)
          return
       end
 
-      debug("Command found:", command)
+      debug("Command found: ", command)
       os.execute(monitor_settings["commands"][command])
    end
 
@@ -120,16 +120,16 @@ function mqtt_thread_func(pipe, config_json)
 
          local packet_id, err = client:subscribe(subscribe_options)
          if not packet_id then
-            error("Failed to subscribe:", err)
+            error("Failed to subscribe: ", err)
          end
       end,
 
       subscribe = function(packet)
-         debug("MQTT subscribe callback:", inspect(packet))
+         debug("MQTT subscribe callback: ", inspect(packet))
       end,
 
       unsubscribe = function(packet)
-         debug("MQTT unsubscribe callback:", inspect(reply))
+         debug("MQTT unsubscribe callback: ", inspect(reply))
       end,
 
       message = function(packet)
@@ -137,7 +137,7 @@ function mqtt_thread_func(pipe, config_json)
 
          local succeeded, msg = client:acknowledge(packet)
          if not succeeded then
-            error("Failed to acknowledge:", msg)
+            error("Failed to acknowledge: ", msg)
             return
          end
 
@@ -146,24 +146,24 @@ function mqtt_thread_func(pipe, config_json)
             error("Failed to decode MQTT message:", msg)
             return
          end
-         debug("Received command:", msg.command)
+         debug("Received command: ", msg.command)
          execute_command(msg.command)
       end,
 
       acknowledge = function(packet)
-         debug("MQTT acknowledge callback:", ispect(packet))
+         debug("MQTT acknowledge callback: ", ispect(packet))
       end,
 
       error = function(msg)
-         warn("MQTT client error:", msg)
+         warn("MQTT client error: ", msg)
       end,
 
       close = function(connection)
-         debug("MQTT connection closed:", connection.close_reason)
+         debug("MQTT connection closed: ", connection.close_reason)
       end,
 
       auth = function(packet)
-         debug("MQTT auth callback:", inspect(packet))
+         debug("MQTT auth callback: ", inspect(packet))
       end,
    }
 
