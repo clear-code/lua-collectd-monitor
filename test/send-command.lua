@@ -1,5 +1,6 @@
 local inspect = require('inspect')
 local mqtt = require('mqtt')
+local lunajson = require('lunajson')
 
 local conf = {
    Host = "localhost",
@@ -28,15 +29,21 @@ client:on {
          return
       end
 
+      command = {
+         command = conf.Command,
+         timestamp = os.time(),
+      }
+
       options = {
          topic = conf.CommandTopic,
-         payload = conf.Command,
+         payload = lunajson.encode(command),
          qos = conf.QoS,
          callback = function(packet)
             print(inspect(packet))
             client:disconnect()
          end,
       }
+
       client:publish(options)
    end,
 
