@@ -1,6 +1,5 @@
 {
-  "commands":
-    {
-      "hello": "echo \"Hello World!\""
-    }
+  "commands": {
+    "hello": "echo \"Hello World!\""
+  }
 }
