@@ -93,6 +93,7 @@ function mqtt_thread_func(pipe, config_json)
 
          subscribe_options = {
             topic = conf.CommandTopic,
+            qos = conf.QoS,
          }
          assert(client:subscribe(subscribe_options))
       end,
