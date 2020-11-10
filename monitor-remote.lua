@@ -55,7 +55,7 @@ function mqtt_thread_func(pipe, config_json)
       connect = function(reply)
 	 if reply.rc ~= 0 then
 	    print("Failed to connect to broker: ",
-		  reply:reason_string(), reply)
+                  reply:reason_string(), reply)
 	 end
 
 	 subscribe_options = {
