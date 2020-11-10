@@ -20,67 +20,54 @@ function config(conf)
 end
 
 function mqtt_thread_func(pipe, config_json)
-   local inspect = require('inspect')
-   local mqtt = require('mqtt')
-   local cqueues = require("cqueues")
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
-   local cq = cqueues.new()
-   local loop = mqtt.get_ioloop()
-   local client = mqtt.client {
-      uri = conf.Host,
-      username = conf.User,
-      password = conf.Password,
-      secure = conf.Secure,
-      clean = conf.CleanSession,
-   }
+   local inspect = require('inspect')
 
-   function get_log_level()
-      local level = string.lower(conf.LogLevel or "warn")
-      if level == "debug" then
-         return 7
-      elseif level == "info" then
-         return 6
-      elseif level == "notice" then
-         return 5
-      elseif level == "warn" or level == "warning"then
-         return 4
-      elseif level == "err" or level == "error" then
-         return 3
-      elseif level == "crit" or level == "critical" then
-         return 2
-      elseif level == "alert" then
-         return 1
-      elseif level == "emerg" then
-         return 0
-      end
-      return 4
+   local logger
+   local log_level = string.lower(conf.LogLevel or "warn")
+   local log_device = string.lower(conf.LogDevice or "syslog")
+   if log_device == "stdout" or log_device == "console" then
+      require('logging.console')
+      logger = logging.console({})
+   else
+      require('logging.syslog')
+      logger = logging.syslog("collectd-monitor-remote")
+   end
+   if log_level == "debug" then
+      logger:setLevel(logging.DEBUG)
+   elseif log_level == "info" then
+      logger:setLevel(logging.INFO)
+   elseif log_level == "warn" or log_level == "warning"then
+      logger:setLevel(logging.WARN)
+   elseif log_level == "err" or log_level == "error" then
+      logger:setLevel(logging.ERROR)
+   elseif log_level == "fatal" then
+      logger:setLevel(logging.FATAL)
    end
 
-   local log_level = get_log_level()
+   function join_messages(...)
+      local result = ""
+      for i = 1, select('#', ...) do
+         result = result .. tostring(select(i, ...))
+      end
+      return result
+   end
 
    function debug(...)
-      if (log_level >= 7) then
-         print(...)
-      end
+      logger:debug(join_messages(...))
    end
 
    function info(...)
-      if (log_level >= 6) then
-         print(...)
-      end
+      logger:info(join_messages(...))
    end
 
    function warn(...)
-      if (log_level >= 4) then
-         print(...)
-      end
+      logger:warn(join_messages(...))
    end
 
    function error(...)
-      if (log_level >= 3) then
-         print(...)
-      end
+      logger:error(join_messages(...))
    end
 
    function execute_command(command)
@@ -107,6 +94,17 @@ function mqtt_thread_func(pipe, config_json)
       os.execute(monitor_settings["commands"][command])
    end
 
+   local mqtt = require('mqtt')
+   local cqueues = require("cqueues")
+   local cq = cqueues.new()
+   local loop = mqtt.get_ioloop()
+   local client = mqtt.client {
+      uri = conf.Host,
+      username = conf.User,
+      password = conf.Password,
+      secure = conf.Secure,
+      clean = conf.CleanSession,
+   }
    client:on {
       connect = function(reply)
          if reply.rc ~= 0 then
