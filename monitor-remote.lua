@@ -66,19 +66,19 @@ function mqtt_thread_func(pipe, config_json)
    end
 
    function info(...)
-      if (log_level <= 6) then
+      if (log_level >= 6) then
          print(...)
       end
    end
 
    function warn(...)
-      if (log_level <= 4) then
+      if (log_level >= 4) then
          print(...)
       end
    end
 
    function error(...)
-      if (log_level <= 3) then
+      if (log_level >= 3) then
          print(...)
       end
    end
