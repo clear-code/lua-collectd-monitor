@@ -1,24 +1,28 @@
+#!/usr/bin/env lua
+
 local inspect = require('inspect')
 local mqtt = require('mqtt')
 local lunajson = require('lunajson')
+local argparse = require('argparse')
 
-local conf = {
-   Host = "localhost",
-   User = "test-user",
-   Password = "test-user",
-   secure = false,
-   CleanSession = false,
-   CommandTopic = "test-topic",
-   QoS = 0,
-   Command = "Command",
-}
+local parser = argparse("send-command", "Send a command to monitor-remote.lua")
+parser:argument("command", "A command to send")
+parser:option("-h --host", "MQTT Broker", "localhost")
+parser:option("-u --user", "MQTT User")
+parser:option("-p --password", "Password for the MQTT user")
+parser:option("-s --secure", "Use TLS", false)
+parser:option("-q --qos", "QoS", 0)
+parser:option("-c --cleansession", "Clean session on exit", true)
+parser:option("-t --topic", "Topic to send")
+
+local args = parser:parse()
 
 local client = mqtt.client {
-   uri = conf.Host,
-   username = conf.User,
-   password = conf.Password,
-   secure = conf.Secure,
-   clean = conf.CleanSession,
+   uri = args.host,
+   username = args.user,
+   password = args.password,
+   secure = args.secure,
+   clean = args.cleansession,
 }
 
 client:on {
@@ -30,14 +34,14 @@ client:on {
       end
 
       command = {
-         command = conf.Command,
+         command = args.command,
          timestamp = os.date("!%Y-%m-%dT%TZ"),
       }
 
       options = {
-         topic = conf.CommandTopic,
+         topic = args.topic,
          payload = lunajson.encode(command),
-         qos = conf.QoS,
+         qos = args.qos,
          callback = function(packet)
             print(inspect(packet))
             client:disconnect()
