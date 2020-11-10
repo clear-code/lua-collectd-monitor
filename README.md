@@ -18,7 +18,7 @@ $ sudo luarocks make
 </LoadPlugin>
 <Plugin lua>
   BasePath "/usr/local/share/lua/5.1/collectd-monitor/"
-  Script "remote.lua"
-  Script "local.lua"
+  Script "monitor-remote.lua"
+  Script "monitor-local.lua"
 </Plugin>
 ```

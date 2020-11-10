@@ -17,11 +17,13 @@ dependencies = {
     "luasec >= 0.9",
     "cqueues >= 20200726.51",
     "lunajson >= 1.2.3",
+    "argparse >= 0.7.1",
 }
 build = {
     type = "builtin",
     modules = {
-        ["collectd-monitor.remote"] = "monitor-remote.lua",
-        ["collectd-monitor.local"] = "monitor-local.lua",
+        ["collectd-monitor.monitor-remote"] = "monitor-remote.lua",
+        ["collectd-monitor.monitor-local"] = "monitor-local.lua",
+        ["collectd-monitor.send-command"] = "send-command.lua",
     },
 }
