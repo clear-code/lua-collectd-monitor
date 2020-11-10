@@ -23,19 +23,19 @@ local client = mqtt.client {
 client:on {
    connect = function(reply)
       if reply.rc ~= 0 then
-	 print("Failed to connect to broker: ",
-	       reply:reason_string(), reply)
-	 return
+         print("Failed to connect to broker: ",
+               reply:reason_string(), reply)
+         return
       end
 
       options = {
-	 topic = conf.CommandTopic,
-	 payload = conf.Command,
-	 qos = conf.QoS,
-	 callback = function(packet)
-	    print(inspect(packet))
-	    client:disconnect()
-	 end,
+         topic = conf.CommandTopic,
+         payload = conf.Command,
+         qos = conf.QoS,
+         callback = function(packet)
+            print(inspect(packet))
+            client:disconnect()
+         end,
       }
       client:publish(options)
    end,
