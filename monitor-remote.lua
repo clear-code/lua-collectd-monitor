@@ -92,8 +92,8 @@ function mqtt_thread_func(pipe, config_json)
       local content = file:read("*all")
       file:close()
 
-      local status, monitor_settings = pcall(lunajson.decode, content)
-      if not status or not monitor_settings or not monitor_settings["commands"] then
+      local succeeded, monitor_settings = pcall(lunajson.decode, content)
+      if not succeeded or not monitor_settings or not monitor_settings["commands"] then
          error("No command is configured!")
          return
       end
