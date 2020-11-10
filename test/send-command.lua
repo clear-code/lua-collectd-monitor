@@ -31,7 +31,7 @@ client:on {
 
       command = {
          command = conf.Command,
-         timestamp = os.date("!%Y-%m-%dT%TZ", os.time()),
+         timestamp = os.date("!%Y-%m-%dT%TZ"),
       }
 
       options = {
