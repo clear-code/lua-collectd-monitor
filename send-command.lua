@@ -40,7 +40,7 @@ client:on {
       options = {
          topic = args.topic,
          payload = lunajson.encode(command),
-         qos = args.qos,
+         qos = tonumber(args.qos),
          callback = function(packet)
             print(inspect(packet))
             client:disconnect()
