@@ -83,6 +83,30 @@ function mqtt_thread_func(pipe, config_json)
       end
    end
 
+   function execute_command(command)
+      local file, err, errnum = io.open(conf.MonitorConfigPath, "rb")
+      if not file then
+         error(err)
+         return
+      end
+      local content = file:read("*all")
+      file:close()
+
+      local status, monitor_settings = pcall(lunajson.decode, content)
+      if not status or not monitor_settings or not monitor_settings["commands"] then
+         error("No command is configured!")
+         return
+      end
+
+      if not monitor_settings["commands"][command] then
+         error("Cannot find command:", command)
+         return
+      end
+
+      debug("Command found:", command)
+      os.execute(monitor_settings["commands"][command])
+   end
+
    client:on {
       connect = function(reply)
          if reply.rc ~= 0 then
@@ -125,6 +149,7 @@ function mqtt_thread_func(pipe, config_json)
             return
          end
          debug("Received command:", msg.command)
+         execute_command(msg.command)
       end,
 
       acknowledge = function(packet)
