@@ -32,12 +32,12 @@ client:on {
          return
       end
 
-      command = {
+      local command = {
          command = args.command,
          timestamp = os.date("!%Y-%m-%dT%TZ"),
       }
 
-      options = {
+      local options = {
          topic = args.topic,
          payload = lunajson.encode(command),
          qos = tonumber(args.qos),
