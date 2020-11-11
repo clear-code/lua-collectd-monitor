@@ -208,7 +208,7 @@ function mqtt_thread_func(pipe, config_json)
    loop:add(client)
    while true do
       loop:iteration()
-      line, why = pipe:recv("*L", "t")
+      local line, why = pipe:recv("*L", "t")
       if line == "finish\n" then
          break
       end
