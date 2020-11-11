@@ -158,7 +158,7 @@ function mqtt_thread_func(pipe, config_json)
       end,
 
       message = function(packet)
-         debug("received message", packet)
+         debug("Received message: ", packet)
 
          local succeeded, msg = client:acknowledge(packet)
          if not succeeded then
@@ -168,10 +168,11 @@ function mqtt_thread_func(pipe, config_json)
 
          succeeded, msg = pcall(lunajson.decode, packet.payload)
          if not succeeded or not msg or not msg.command then
-            error("Failed to decode MQTT message:", msg)
+            error("Failed to decode MQTT message: ", packet.payload)
             return
          end
          debug("Received command: ", msg.command)
+
          execute_command(msg.command)
       end,
 
