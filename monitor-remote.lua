@@ -196,7 +196,15 @@ function mqtt_thread_func(pipe, config_json)
    --[[
       Main I/O loop
    ]]--
-   local loop = mqtt.get_ioloop()
+   local autocreate = true
+   local loop_options = {
+      --[[
+       timeout = 0.005, -- network operations timeout in seconds
+       sleep = 0,       -- sleep interval after each iteration
+       sleep_function = require("socket").sleep,
+      ]]--
+   }
+   local loop = mqtt.get_ioloop(autocreate, loop_options)
    loop:add(client)
    while true do
       loop:iteration()
