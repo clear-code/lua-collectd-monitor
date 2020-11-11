@@ -8,8 +8,17 @@ local mqtt_thread_pipe
 
 collectd.register_config(function(conf)
    collectd.log_debug("monitor-remote.lua: config")
-   mqtt_config_json = require('lunajson').encode(conf)
-   collectd.log_debug("config: " .. mqtt_config_json)
+
+   local lunajson = require('lunajson')
+   mqtt_config_json = lunajson.encode(conf)
+
+   local debug_config_json = mqtt_config_json
+   if conf.Password then
+      conf.Password = "********"
+      debug_config_json = lunajson.encode(conf)
+   end
+   collectd.log_debug("config: " .. debug_config_json)
+
    return 0
 end)
 
