@@ -9,10 +9,12 @@ local mqtt_thread_pipe
 collectd.register_config(function(conf)
    collectd.log_debug("monitor-remote.lua: config")
    mqtt_config_json = require('lunajson').encode(conf)
+   collectd.log_debug("config: " .. mqtt_config_json)
    return 0
 end)
 
 collectd.register_init(function()
+   collectd.log_debug("monitor-remote.lua: init")
    local conf = mqtt_config
    mqtt_thread, mqtt_thread_pipe =
       require('cqueues.thread').start(mqtt_thread_func, mqtt_config_json)
