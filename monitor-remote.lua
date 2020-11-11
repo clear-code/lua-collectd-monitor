@@ -112,9 +112,6 @@ function mqtt_thread_func(pipe, config_json)
    end
 
    local mqtt = require('mqtt')
-   local cqueues = require("cqueues")
-   local cq = cqueues.new()
-   local loop = mqtt.get_ioloop()
    local client = mqtt.client {
       uri = conf.Host,
       username = conf.User,
@@ -184,6 +181,10 @@ function mqtt_thread_func(pipe, config_json)
       end,
    }
 
+   --[[
+      Main I/O loop
+   ]]--
+   local loop = mqtt.get_ioloop()
    loop:add(client)
    while true do
       loop:iteration()
