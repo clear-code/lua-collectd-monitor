@@ -1,3 +1,41 @@
+--[[
+   Register collectd callback functions
+]]--
+
+local mqtt_config_json
+local mqtt_thread
+local mqtt_thread_pipe
+
+collectd.register_config(function(conf)
+   collectd.log_debug("monitor-remote.lua: config")
+   mqtt_config_json = require('lunajson').encode(conf)
+   return 0
+end)
+
+collectd.register_init(function()
+   local conf = mqtt_config
+   mqtt_thread, mqtt_thread_pipe =
+      require('cqueues.thread').start(mqtt_thread_func, mqtt_config_json)
+   return 0
+end)
+
+collectd.register_shutdown(function()
+   collectd.log_debug("monitor-remote.lua: shutdown")
+   mqtt_thread_pipe:write("finish\n")
+   mqtt_thread:join()
+   return 0
+end)
+
+
+--[[
+   Poll MQTT messages and handle commands in another thread.
+   Since it uses cqueues.thread, it can't refer parent objects, it can just
+   only receive string arguments from the caller.
+   refs:
+     https://github.com/wahern/cqueues
+     https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
+]]--
+
 function mqtt_thread_func(pipe, config_json)
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
@@ -158,32 +196,3 @@ function mqtt_thread_func(pipe, config_json)
    loop:remove(client)
    info("MQTT thread finished")
 end
-
-
-local mqtt_config_json
-local mqtt_thread
-local mqtt_thread_pipe
-
-function config(conf)
-   collectd.log_debug("monitor-remote.lua: config")
-   mqtt_config_json = require('lunajson').encode(conf)
-   return 0
-end
-
-function init()
-   local conf = mqtt_config
-   mqtt_thread, mqtt_thread_pipe =
-      require('cqueues.thread').start(mqtt_thread_func, mqtt_config_json)
-   return 0
-end
-
-function shutdown()
-   collectd.log_debug("monitor-remote.lua: shutdown")
-   mqtt_thread_pipe:write("finish\n")
-   mqtt_thread:join()
-   return 0
-end
-
-collectd.register_config(config)
-collectd.register_init(init)
-collectd.register_shutdown(shutdown)
