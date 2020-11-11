@@ -1,24 +1,3 @@
-local inspect = require('inspect')
-local mqtt = require('mqtt')
-local cqueues = require('cqueues')
-local thread = require('cqueues.thread')
-local lunajson = require('lunajson')
-local mqtt_config_json
-local mqtt_thread
-local mqtt_thread_pipe
-
-local DEBUG  = collectd.log_debug
-local ERROR  = collectd.log_error
-local INFO   = collectd.log_info
-local NOTICE = collectd.log_notice
-local WARN   = collectd.log_warning
-
-function config(conf)
-   DEBUG("monitor-remote.lua: config")
-   mqtt_config_json = lunajson.encode(conf)
-   return 0
-end
-
 function mqtt_thread_func(pipe, config_json)
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
@@ -180,20 +159,30 @@ function mqtt_thread_func(pipe, config_json)
    info("MQTT thread finished")
 end
 
+
+local mqtt_config_json
+local mqtt_thread
+local mqtt_thread_pipe
+
+function config(conf)
+   collectd.log_debug("monitor-remote.lua: config")
+   mqtt_config_json = require('lunajson').encode(conf)
+   return 0
+end
+
 function init()
    local conf = mqtt_config
    mqtt_thread, mqtt_thread_pipe =
-      thread.start(mqtt_thread_func, mqtt_config_json)
+      require('cqueues.thread').start(mqtt_thread_func, mqtt_config_json)
    return 0
 end
 
 function shutdown()
-   DEBUG("monitor-remote.lua: shutdown")
+   collectd.log_debug("monitor-remote.lua: shutdown")
    mqtt_thread_pipe:write("finish\n")
    mqtt_thread:join()
    return 0
 end
-
 
 collectd.register_config(config)
 collectd.register_init(init)
