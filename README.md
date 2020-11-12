@@ -6,6 +6,7 @@ A collectd plugin written in Lua, it provides monitoring feature.
 
 * At first, you need to install customized version of collectd
   * https://github.com/clear-code/collectd/tree/cc-luajit
+    * Required additional callback functions are supported in `cc-luajit` branch.
 * Download and install lua-collectd-monitor:
 ```shell
 $ git clone https://github.com/clear-code/lua-collectd-monitor
