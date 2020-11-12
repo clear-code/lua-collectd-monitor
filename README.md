@@ -19,15 +19,15 @@ $ sudo luarocks make
 <Plugin lua>
   BasePath "/usr/local/share/lua/5.1/collectd/"
   Script "monitor-remote.lua"
-    <Module "monitor-remote">
-      Host "localhost"
-      User "test-user"
-      Password "test-user"
-      Secure false
-      CleanSession true
-      QoS 0
-      CommandTopic "test-topic"
-      LogLevel "debug"
+  <Module "monitor-remote">
+    Host "localhost"
+    User "test-user"
+    Password "test-user"
+    Secure false
+    CleanSession true
+    QoS 0
+    CommandTopic "test-topic"
+    LogLevel "debug"
   </Module>
 </Plugin>
 ```
