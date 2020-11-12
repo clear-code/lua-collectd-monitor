@@ -27,7 +27,6 @@ $ sudo luarocks make
     CleanSession true
     QoS 0
     CommandTopic "test-topic"
-    LogLevel "debug"
   </Module>
 </Plugin>
 ```
