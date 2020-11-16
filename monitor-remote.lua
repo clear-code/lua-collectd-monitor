@@ -98,7 +98,7 @@ function mqtt_thread_func(pipe, config_json)
       logger:error(join_messages(...))
    end
 
-   function dispatch_command(command_name)
+   function dispatch_command(command_name, task_id)
       local file, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
          error(err)
@@ -190,13 +190,13 @@ function mqtt_thread_func(pipe, config_json)
          end
 
          succeeded, msg = pcall(lunajson.decode, packet.payload)
-         if not succeeded or not msg or not msg.command then
+         if not succeeded or not msg or not msg.task_id or not msg.command then
             error("Failed to decode MQTT message: ", packet.payload)
             return
          end
-         debug("Received command: ", msg.command)
+         debug("Received command: ", msg.command, ", task_id: ", msg.task_id)
 
-         dispatch_command(msg.command)
+         dispatch_command(msg.commandm msg.task_id)
       end,
 
       acknowledge = function(packet)

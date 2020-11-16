@@ -32,20 +32,25 @@ client:on {
          return
       end
 
+      math.randomseed(os.clock())
       local command = {
+         task_id = math.random(1, 2^32),
          command = args.command,
          timestamp = os.date("!%Y-%m-%dT%TZ"),
       }
+      local command_json = lunajson.encode(command)
 
       local options = {
          topic = args.topic,
-         payload = lunajson.encode(command),
+         payload = command_json,
          qos = tonumber(args.qos),
          callback = function(packet)
             print(inspect(packet))
             client:disconnect()
          end,
       }
+
+      print("Send command: " .. command_json)
 
       client:publish(options)
    end,
