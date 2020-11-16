@@ -98,7 +98,7 @@ function mqtt_thread_func(pipe, config_json)
       logger:error(join_messages(...))
    end
 
-   function execute_command(command)
+   function dispatch_command(command_name)
       local file, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
          error(err)
@@ -113,13 +113,35 @@ function mqtt_thread_func(pipe, config_json)
          return
       end
 
-      if not monitor_settings["commands"][command] then
-         error("Cannot find command: ", command)
+      if not monitor_settings["commands"][command_name] then
+         error("Cannot find command: ", command_name)
          return
       end
 
-      debug("Command found: ", command)
-      os.execute(monitor_settings["commands"][command])
+      debug("Command found: ", command_name)
+
+      run_command(monitor_settings["commands"][command_name])
+   end
+
+   function run_command(command_line)
+      local cmdline = command_line .. "; echo $?"
+      local pipe = io.popen(cmdline)
+
+      local lines = {}
+      for line in pipe:lines() do
+         lines[#lines + 1] = line
+      end
+
+      local command_output = ""
+      for i = 1, #lines - 1 do
+         command_output = command_output .. lines[i]
+      end
+      local return_code = tonumber(lines[#lines])
+
+      debug("Return code: ", return_code)
+      debug("Command output: ", command_output)
+
+      return return_code, command_output
    end
 
    local mqtt = require('mqtt')
@@ -173,7 +195,7 @@ function mqtt_thread_func(pipe, config_json)
          end
          debug("Received command: ", msg.command)
 
-         execute_command(msg.command)
+         dispatch_command(msg.command)
       end,
 
       acknowledge = function(packet)

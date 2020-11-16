@@ -1,5 +1,8 @@
 {
   "commands": {
-    "hello": "echo \"Hello World!\""
+    "hello": "echo \"Hello World!\"",
+    "true": "/bin/true",
+    "false": "/bin/false",
+    "hoge": "/bin/hoge 2>&1"
   }
 }
