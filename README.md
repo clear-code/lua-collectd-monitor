@@ -41,7 +41,7 @@ $ sudo luarocks make
 ```
 * Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to define available commands
 
-## Testing remote code
+## Testing remote command
 
 * Start collectd daemon
 * Execute like the following command:
