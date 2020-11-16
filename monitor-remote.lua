@@ -151,6 +151,7 @@ function mqtt_thread_func(pipe, config_json)
       password = conf.Password,
       secure = conf.Secure,
       clean = conf.CleanSession,
+      reconnect = conf.ReconnectInterval,
    }
    client:on {
       connect = function(reply)
