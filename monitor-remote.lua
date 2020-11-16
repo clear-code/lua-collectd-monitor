@@ -196,7 +196,7 @@ function mqtt_thread_func(pipe, config_json)
          end
          debug("Received command: ", msg.command, ", task_id: ", msg.task_id)
 
-         dispatch_command(msg.commandm msg.task_id)
+         dispatch_command(msg.command, msg.task_id)
       end,
 
       acknowledge = function(packet)
