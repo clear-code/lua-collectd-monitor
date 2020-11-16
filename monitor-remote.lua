@@ -98,52 +98,6 @@ function mqtt_thread_func(pipe, config_json)
       logger:error(join_messages(...))
    end
 
-   function dispatch_command(command_name, task_id)
-      local file, err, errnum = io.open(conf.MonitorConfigPath, "rb")
-      if not file then
-         error(err)
-         return
-      end
-      local content = file:read("*all")
-      file:close()
-
-      local succeeded, monitor_settings = pcall(lunajson.decode, content)
-      if not succeeded or not monitor_settings or not monitor_settings["commands"] then
-         error("No command is configured!")
-         return
-      end
-
-      if not monitor_settings["commands"][command_name] then
-         error("Cannot find command: ", command_name)
-         return
-      end
-
-      debug("Command found: ", command_name)
-
-      run_command(monitor_settings["commands"][command_name])
-   end
-
-   function run_command(command_line)
-      local cmdline = command_line .. "; echo $?"
-      local pipe = io.popen(cmdline)
-
-      local lines = {}
-      for line in pipe:lines() do
-         lines[#lines + 1] = line
-      end
-
-      local command_output = ""
-      for i = 1, #lines - 1 do
-         command_output = command_output .. lines[i]
-      end
-      local return_code = tonumber(lines[#lines])
-
-      debug("Return code: ", return_code)
-      debug("Command output: ", command_output)
-
-      return return_code, command_output
-   end
-
    local mqtt = require('mqtt')
    local client = mqtt.client {
       uri = conf.Host,
@@ -167,7 +121,9 @@ function mqtt_thread_func(pipe, config_json)
          }
 
          local packet_id, err = client:subscribe(subscribe_options)
-         if not packet_id then
+         if packet_id then
+            debug("Subscribed to ", conf.CommandTopic, ", packet_id: ", packet_id)
+         else
             error("Failed to subscribe: ", err)
          end
       end,
@@ -215,6 +171,80 @@ function mqtt_thread_func(pipe, config_json)
          debug("MQTT auth callback: ", inspect(packet))
       end,
    }
+
+   function dispatch_command(command_name, task_id)
+      local file, err, errnum = io.open(conf.MonitorConfigPath, "rb")
+      if not file then
+         error(err)
+         return
+      end
+      local content = file:read("*all")
+      file:close()
+
+      local succeeded, monitor_settings = pcall(lunajson.decode, content)
+      if not succeeded or not monitor_settings or not monitor_settings["commands"] then
+         error("No command is configured!")
+         return
+      end
+
+      if not monitor_settings["commands"][command_name] then
+         error("Cannot find command: ", command_name)
+         return
+      end
+
+      debug("Command found: ", command_name)
+
+      local code, msg = run_command(monitor_settings["commands"][command_name])
+      send_reply(task_id, code, msg)
+   end
+
+   function run_command(command_line)
+      local cmdline = command_line .. "; echo $?"
+      local pipe = io.popen(cmdline)
+
+      local lines = {}
+      for line in pipe:lines() do
+         lines[#lines + 1] = line
+      end
+
+      local command_output = ""
+      for i = 1, #lines - 1 do
+         command_output = command_output .. lines[i]
+      end
+      local return_code = tonumber(lines[#lines])
+
+      debug("Return code: ", return_code)
+      debug("Command output: ", command_output)
+
+      return return_code, command_output
+   end
+
+   function send_reply(task_id, code, msg)
+      if not conf.CommandResultTopic then
+         return
+      end
+
+      local result_json = lunajson.encode(
+         {
+            task_id = task_id,
+            code = code,
+            messge = msg,
+            timestamp = os.date("!%Y-%m-%dT%TZ"),
+         }
+      )
+      debug("Command result reply: ", result_json)
+
+      local succeeded_or_packet_id, msg = client:publish(
+         {
+            topic = conf.CommandResultTopic,
+            payload = result_json,
+            qos = conf.QoS,
+         }
+      )
+      if not succeeded_or_packet_id then
+         error("Failed to send command result: ", msg)
+      end
+   end
 
    --[[
       Main I/O loop
