@@ -259,6 +259,7 @@ function mqtt_thread_func(pipe, config_json)
    --[[
       Main I/O loop
    ]]--
+   local errno = require('cqueues.errno')
    local autocreate = true
    local loop_options = {
       --[[
@@ -272,7 +273,7 @@ function mqtt_thread_func(pipe, config_json)
    while true do
       loop:iteration()
       local line, why = pipe:recv("*L", "t")
-      if line == "finish\n" then
+      if (line == "finish\n") or (why ~= errno.EAGAIN) then
          break
       end
    end
