@@ -1,6 +1,12 @@
 # lua-collectd-monitor
 
-A collectd plugin written in Lua, it provides monitoring feature.
+A collectd plugin which provides monitoring feature.
+We are planning to provide following 2 plugins:
+
+* monitor-remote.lua
+  * Receive a pre-defined command from a remote host via MQTT and execute it.
+* monitor-local.lua
+  * Not implemented yet
 
 ## Prerequisites
 
@@ -8,6 +14,7 @@ A collectd plugin written in Lua, it provides monitoring feature.
   * https://github.com/clear-code/collectd/tree/cc-luajit
     * Required additional callback functions are supported in `cc-luajit` branch.
 * Lua or LuaJIT
+  * LuaJIT 2.1.0-beta3 is verified
 * MQTT Broker
   * [VerneMQ](https://vernemq.com/) is verified
   * At least 2 topics should be accessible
@@ -45,4 +52,4 @@ $ sudo luarocks make
 
 * Start collectd daemon
 * Execute send-command.lua like the following example:
-  `$ lua ./send-command.lua --user test-user --password test-user --topic command-topic hello`
+  `$ luajit ./send-command.lua --user test-user --password test-user --topic command-topic hello`
