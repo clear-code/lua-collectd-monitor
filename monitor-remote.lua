@@ -184,7 +184,7 @@ function mqtt_thread_func(pipe, config_json)
    function dispatch_command(command_name, task_id)
       local file, err_msg, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
-         error(err)
+         error(err_msg)
          return
       end
       local content = file:read("*all")
@@ -192,15 +192,15 @@ function mqtt_thread_func(pipe, config_json)
 
       local succeeded, monitor_settings = pcall(lunajson.decode, content)
       if not succeeded or not monitor_settings or not monitor_settings["commands"] then
-         err_msg = "No command is configured!"
-         error(error_msg)
+         err_msg = "Cannot handle \"" .. command_name .. "\" command: No command is configured!"
+         error(err_msg)
          send_reply(task_id, 0x1001, err_msg)
          return
       end
 
       if not monitor_settings["commands"][command_name] then
-         err_msg = "Cannot find command setting for: " .. command_name
-         error(error_msg)
+         err_msg = "Cannot find the command setting for: " .. command_name
+         error(err_msg)
          send_reply(task_id, 0x1002, err_msg)
          return
       end
