@@ -21,7 +21,7 @@ A collectd plugin written in Lua, it provides monitoring feature.
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* Add like the following config to your collectd.conf (see conf/collectd-lua-debug.conf for more options)
+* Add settings like the following example to your collectd.conf (see conf/collectd-lua-debug.conf for more details)
 ```xml
 <LoadPlugin lua>
   Globals true
@@ -44,5 +44,5 @@ $ sudo luarocks make
 ## Testing remote command
 
 * Start collectd daemon
-* Execute like the following command:
+* Execute send-command.lua like the following example:
   `$ lua ./send-command.lua --user test-user --password test-user --topic command-topic hello`
