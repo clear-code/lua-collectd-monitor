@@ -60,7 +60,7 @@ function mqtt_thread_func(pipe, config_json)
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
    local inspect = require('inspect')
-
+   local command_threads = {}
    local logger
    local log_level = string.lower(conf.LogLevel or "warn")
    local log_device = string.lower(conf.LogDevice or "syslog")
@@ -207,11 +207,19 @@ function mqtt_thread_func(pipe, config_json)
 
       debug("Command found: ", command_name)
 
-      local code, msg = run_command(monitor_settings["commands"][command_name])
-      send_reply(task_id, code, msg)
+      local thread = require('cqueues.thread')
+      local command_thread, command_thread_pipe =
+         thread.start(run_command,
+                      monitor_settings["commands"][command_name],
+                      tostring(task_id))
+      command_threads[task_id] = {
+         thread = command_thread,
+         pipe = command_thread_pipe,
+         result_json = "",
+      }
    end
 
-   function run_command(command_line)
+   function run_command(thread_pipe, command_line, task_id)
       local cmdline = command_line .. "; echo $?"
       local pipe = io.popen(cmdline)
 
@@ -224,12 +232,14 @@ function mqtt_thread_func(pipe, config_json)
       for i = 1, #lines - 1 do
          command_output = command_output .. lines[i]
       end
-      local return_code = tonumber(lines[#lines])
 
-      debug("Return code: ", return_code)
-      debug("Command output: ", command_output)
+      local result = {
+         task_id = tonumber(task_id),
+         code = tonumber(lines[#lines]),
+         message = command_output,
+      }
 
-      return return_code, command_output
+      thread_pipe:write(require('lunajson').encode(result) .. "\n")
    end
 
    function send_reply(task_id, code, msg)
@@ -273,13 +283,35 @@ function mqtt_thread_func(pipe, config_json)
    }
    local loop = mqtt.get_ioloop(autocreate, loop_options)
    loop:add(client)
+
    while true do
       loop:iteration()
+
+      for key, t in pairs(command_threads) do
+         local line, why = t.pipe:recv("*L", "t")
+         if line ~= nil then
+            t.result_json = t.result_json .. line
+         end
+         if why ~= errno.EAGAIN then
+            t.thread:join()
+            local succeeded, result = pcall(lunajson.decode, t.result_json)
+            if succeeded and result then
+               send_reply(result.task_id, result.code, result.message)
+            else
+               error("Failed to decode result JSON: ", t.result_json)
+               send_reply(tonumber(key), 0x1100,
+                          "Failed to decode result json" .. t.result_json)
+            end
+            command_threads[key] = nil
+         end
+      end
+
       local line, why = pipe:recv("*L", "t")
       if (line == "finish\n") or (why ~= errno.EAGAIN) then
          break
       end
    end
+
    client:disconnect()
    loop:remove(client)
    info("MQTT thread finished")
