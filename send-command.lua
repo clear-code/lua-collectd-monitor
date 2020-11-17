@@ -11,7 +11,7 @@ parser:option("-h --host", "MQTT Broker", "localhost")
 parser:option("-u --user", "MQTT User")
 parser:option("-p --password", "Password for the MQTT user")
 parser:flag("-s --secure", "Use TLS", false)
-parser:option("-q --qos", "QoS for the command", 0)
+parser:option("-q --qos", "QoS for the command", 2)
 parser:option("-t --topic", "Topic to send")
 
 local args = parser:parse()
@@ -21,7 +21,7 @@ local client = mqtt.client {
    username = args.user,
    password = args.password,
    secure = args.secure,
-   clean = true,
+   clean = false,
 }
 
 client:on {

@@ -10,6 +10,9 @@ collectd.register_config(
    function(conf)
       collectd.log_debug("monitor-remote.lua: config")
 
+      conf.ClearSession = conf.ClearSession or false
+      conf.QoS = conf.QoS or 2
+
       local lunajson = require('lunajson')
       mqtt_config_json = lunajson.encode(conf)
 
@@ -139,7 +142,7 @@ function mqtt_thread_func(pipe, config_json)
       end,
 
       unsubscribe = function(packet)
-         debug("MQTT unsubscribe callback: ", inspect(reply))
+         debug("MQTT unsubscribe callback: ", inspect(packet))
       end,
 
       message = function(packet)
@@ -162,7 +165,7 @@ function mqtt_thread_func(pipe, config_json)
       end,
 
       acknowledge = function(packet)
-         debug("MQTT acknowledge callback: ", ispect(packet))
+         debug("MQTT acknowledge callback: ", inspect(packet))
       end,
 
       error = function(msg)
