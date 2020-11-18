@@ -54,7 +54,7 @@ collectd.register_shutdown(
 --   https://github.com/wahern/cqueues
 --   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
 
-function mqtt_thread_func(pipe, config_json)
+function mqtt_thread_func(mqtt_thread_pipe, config_json)
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
@@ -306,7 +306,7 @@ function mqtt_thread_func(pipe, config_json)
          handle_command_task(task_id, ctx)
       end
 
-      local line, why = pipe:recv("*L", "t")
+      local line, why = mqtt_thread_pipe:recv("*L", "t")
       if (line == "finish\n") or (why ~= errno.EAGAIN) then
          break
       end
