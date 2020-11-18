@@ -172,7 +172,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
          end
 
          debug("Received a command: ", msg.command, ", task_id: ", msg.task_id)
-         dispatch_command(msg.service, msg.command, msg.task_id)
+         dispatch_command(msg.task_id, msg.service, msg.command)
       end,
 
       acknowledge = function(packet)
@@ -192,10 +192,20 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       end,
    }
 
-   function dispatch_command(service_name, command_name, task_id)
+   function dispatch_command(task_id, service_name, command_name)
+      local err_msg
+
+      if command_threads[task_id] then
+         err_msg = "Received duplicate task_id: " .. tostring(task_id)
+         error(err_msg)
+         send_reply(task_id, 0x1100, err_msg)
+         return
+      end
+
       local file, err_msg, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
          error(err_msg)
+         send_reply(task_id, 0x1001, err_msg)
          return
       end
       local content = file:read("*all")
