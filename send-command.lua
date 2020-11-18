@@ -6,7 +6,8 @@ local lunajson = require('lunajson')
 local argparse = require('argparse')
 
 local parser = argparse("send-command", "Send a command to monitor-remote.lua")
-parser:argument("command", "A command to send")
+parser:argument("service", "A service name to interact")
+parser:argument("command", "A command for the service to send")
 parser:option("-h --host", "MQTT Broker", "localhost")
 parser:option("-u --user", "MQTT User")
 parser:option("-p --password", "Password for the MQTT user")
@@ -35,6 +36,7 @@ client:on {
       math.randomseed(os.clock())
       local command = {
          task_id = math.random(1, 2^32),
+         service = args.service,
          command = args.command,
          timestamp = os.date("!%Y-%m-%dT%TZ"),
       }

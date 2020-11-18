@@ -52,4 +52,5 @@ $ sudo luarocks make
 
 * Start collectd daemon
 * Execute send-command.lua like the following example:
-  `$ luajit ./send-command.lua --user test-user --password test-user --topic command-topic hello`
+  `$ luajit ./send-command.lua --user test-user --password test-user --topic command-topic hello exec`
+  * See `luajit ./send-command.lua --help` and its source code for more details

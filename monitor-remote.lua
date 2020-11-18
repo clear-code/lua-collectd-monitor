@@ -158,14 +158,21 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
             return
          end
 
+         function is_valid_message(msg)
+            return msg and msg.task_id and msg.service and msg.command
+         end
+
          succeeded, msg = pcall(lunajson.decode, packet.payload)
-         if not succeeded or not msg or not msg.task_id or not msg.command then
+         if not succeeded then
             error("Failed to decode MQTT message: ", packet.payload)
             return
+         elseif not is_valid_message(msg) then
+            error("Invalid message: ", packet.payload)
+            return
          end
-         debug("Received command: ", msg.command, ", task_id: ", msg.task_id)
 
-         dispatch_command(msg.command, msg.task_id)
+         debug("Received a command: ", msg.command, ", task_id: ", msg.task_id)
+         dispatch_command(msg.service, msg.command, msg.task_id)
       end,
 
       acknowledge = function(packet)
@@ -185,7 +192,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       end,
    }
 
-   function dispatch_command(command_name, task_id)
+   function dispatch_command(service_name, command_name, task_id)
       local file, err_msg, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
          error(err_msg)
@@ -195,28 +202,44 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       file:close()
 
       local succeeded, monitor_settings = pcall(lunajson.decode, content)
-      if not succeeded or not monitor_settings or not monitor_settings["commands"] then
-         err_msg = "Cannot handle \"" .. command_name .. "\" command: No command is configured!"
+      if not succeeded or not monitor_settings or not monitor_settings["services"] then
+         err_msg = "Cannot handle \"" .. command_name .. "\" command: No service is configured!"
          error(err_msg)
          send_reply(task_id, 0x1001, err_msg)
          return
       end
 
-      if not monitor_settings["commands"][command_name] then
-         err_msg = "Cannot find the command setting for: " .. command_name
+      local service_settings = monitor_settings["services"][service_name]
+
+      if not service_settings then
+         err_msg = "Cannot find the service settings for: " .. service_name
          error(err_msg)
          send_reply(task_id, 0x1002, err_msg)
          return
       end
 
-      debug("Command found: ", command_name)
+      local commands = service_settings["commands"]
+
+      if not commands or not commands[command_name] then
+         err_msg = "Cannot find " .. command_name .. " command for " .. service_name
+         error(err_msg)
+         send_reply(task_id, 0x1003, err_msg)
+         return
+      end
+
+      debug("Found a command: ",
+            "service_name: ", service_name, ", ",
+            "command_name: ", command_name, ", ",
+            "command: ", commands[command_name])
 
       local thread = require('cqueues.thread')
       local command_thread, command_thread_pipe =
          thread.start(run_command,
-                      monitor_settings["commands"][command_name],
+                      commands[command_name],
                       tostring(task_id))
       command_threads[task_id] = {
+         service = service_name,
+         command = command_name,
          thread = command_thread,
          pipe = command_thread_pipe,
          result_json = "",

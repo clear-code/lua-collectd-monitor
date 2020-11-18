@@ -1,8 +1,29 @@
 {
-  "commands": {
-    "hello": "echo \"Hello World!\"",
-    "true": "/bin/true",
-    "false": "/bin/false",
-    "hoge": "/bin/hoge 2>&1"
+  "services": {
+    "nginx": {
+      "commands" : {
+        "restart": "systemctl restart nginx 2>&1"
+      }
+    },
+    "hello": {
+      "commands": {
+        "exec": "echo \"Hello World!\""
+      }
+    },
+    "true": {
+      "commands": {
+        "exec": "/bin/true"
+      }
+    },
+    "false": {
+      "commands": {
+        "exec": "/bin/false"
+      }
+    },
+    "no-command": {
+      "commands": {
+        "exec": "/bin/no-command 2>&1"
+      }
+    }
   }
 }
