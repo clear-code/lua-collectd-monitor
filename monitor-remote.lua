@@ -193,19 +193,22 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
    }
 
    function dispatch_command(task_id, service_name, command_name)
-      local err_msg
+      local ERROR_NO_CONFIG  = 0x1001
+      local ERROR_NO_SERVICE = 0x1002
+      local ERROR_NO_COMMAND = 0x1003
+      local ERROR_DUPLICATE_TASK_ID = 0x1100
 
       if command_threads[task_id] then
-         err_msg = "Received duplicate task_id: " .. tostring(task_id)
+         local err_msg = "Received duplicate task_id: " .. tostring(task_id)
          error(err_msg)
-         send_reply(task_id, 0x1100, err_msg)
+         send_reply(task_id, ERROR_DUPLICATE_TASK_ID, err_msg)
          return
       end
 
       local file, err_msg, err, errnum = io.open(conf.MonitorConfigPath, "rb")
       if not file then
          error(err_msg)
-         send_reply(task_id, 0x1001, err_msg)
+         send_reply(task_id, ERROR_NO_CONFIG, err_msg)
          return
       end
       local content = file:read("*all")
@@ -215,7 +218,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       if not succeeded or not monitor_settings or not monitor_settings["services"] then
          err_msg = "Cannot handle \"" .. command_name .. "\" command: No service is configured!"
          error(err_msg)
-         send_reply(task_id, 0x1001, err_msg)
+         send_reply(task_id, ERROR_NO_CONFIG, err_msg)
          return
       end
 
@@ -224,7 +227,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       if not service_settings then
          err_msg = "Cannot find the service settings for: " .. service_name
          error(err_msg)
-         send_reply(task_id, 0x1002, err_msg)
+         send_reply(task_id, ERROR_NO_SERVICE, err_msg)
          return
       end
 
@@ -233,7 +236,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
       if not commands or not commands[command_name] then
          err_msg = "Cannot find " .. command_name .. " command for " .. service_name
          error(err_msg)
-         send_reply(task_id, 0x1003, err_msg)
+         send_reply(task_id, ERROR_NO_COMMAND, err_msg)
          return
       end
 
