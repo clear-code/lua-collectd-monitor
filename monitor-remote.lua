@@ -55,6 +55,7 @@ collectd.register_shutdown(
 --   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
 
 function mqtt_thread_func(pipe, config_json)
+   local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
    local inspect = require('inspect')
@@ -267,10 +268,28 @@ function mqtt_thread_func(pipe, config_json)
       end
    end
 
+   function handle_command_task(task_id, ctx)
+      local line, why = ctx.pipe:recv("*L", "t")
+      if line ~= nil then
+         ctx.result_json = ctx.result_json .. line
+      end
+      if why ~= errno.EAGAIN then
+         ctx.thread:join()
+         local succeeded, result = pcall(lunajson.decode, ctx.result_json)
+         if succeeded and result then
+            send_reply(result.task_id, result.code, result.message)
+         else
+            error("Failed to decode result JSON: ", ctx.result_json)
+            send_reply(tonumber(key), 0x1100,
+                       "Failed to decode result json" .. ctx.result_json)
+         end
+         command_threads[task_id] = nil
+      end
+   end
+
    --
    -- Main I/O loop
    --
-   local errno = require('cqueues.errno')
    local autocreate = true
    local loop_options = {
       -- timeout = 0.005, -- network operations timeout in seconds
@@ -283,23 +302,8 @@ function mqtt_thread_func(pipe, config_json)
    while true do
       loop:iteration()
 
-      for key, t in pairs(command_threads) do
-         local line, why = t.pipe:recv("*L", "t")
-         if line ~= nil then
-            t.result_json = t.result_json .. line
-         end
-         if why ~= errno.EAGAIN then
-            t.thread:join()
-            local succeeded, result = pcall(lunajson.decode, t.result_json)
-            if succeeded and result then
-               send_reply(result.task_id, result.code, result.message)
-            else
-               error("Failed to decode result JSON: ", t.result_json)
-               send_reply(tonumber(key), 0x1100,
-                          "Failed to decode result json" .. t.result_json)
-            end
-            command_threads[key] = nil
-         end
+      for task_id, ctx in pairs(command_threads) do
+         handle_command_task(task_id, ctx)
       end
 
       local line, why = pipe:recv("*L", "t")
