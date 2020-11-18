@@ -54,7 +54,11 @@ collectd.register_shutdown(
 --   https://github.com/wahern/cqueues
 --   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
 
-function mqtt_thread_func(mqtt_thread_pipe, config_json)
+function mqtt_thread_func(mqtt_thread_pipe, config_json, load_path)
+   if load_path then
+      package.path = load_path
+   end
+
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
    local conf = lunajson.decode(config_json)
@@ -63,6 +67,7 @@ function mqtt_thread_func(mqtt_thread_pipe, config_json)
    local logger
    local log_level = string.lower(conf.LogLevel or "warn")
    local log_device = string.lower(conf.LogDevice or "syslog")
+
    if log_device == "stdout" or log_device == "console" then
       require('logging.console')
       logger = logging.console()
