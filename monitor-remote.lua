@@ -1,6 +1,6 @@
---[[
-   Register collectd callback functions
-]]--
+--
+-- Register collectd callback functions
+--
 
 local mqtt_config_json
 local mqtt_thread
@@ -47,14 +47,12 @@ collectd.register_shutdown(
 )
 
 
---[[
-   Poll MQTT messages and handle commands in another thread.
-   Since it uses cqueues.thread, it can't refer parent objects, it can just
-   only receive string arguments from the caller.
-   refs:
-     https://github.com/wahern/cqueues
-     https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
-]]--
+-- Poll MQTT messages and handle commands in another thread.
+-- Since it uses cqueues.thread, it can't refer parent objects, it can just
+-- only receive string arguments from the caller.
+-- refs:
+--   https://github.com/wahern/cqueues
+--   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
 
 function mqtt_thread_func(pipe, config_json)
    local lunajson = require('lunajson')
@@ -269,17 +267,15 @@ function mqtt_thread_func(pipe, config_json)
       end
    end
 
-   --[[
-      Main I/O loop
-   ]]--
+   --
+   -- Main I/O loop
+   --
    local errno = require('cqueues.errno')
    local autocreate = true
    local loop_options = {
-      --[[
-       timeout = 0.005, -- network operations timeout in seconds
-       sleep = 0,       -- sleep interval after each iteration
-       sleep_function = require("socket").sleep,
-      ]]--
+      -- timeout = 0.005, -- network operations timeout in seconds
+      -- sleep = 0,       -- sleep interval after each iteration
+      -- sleep_function = require("socket").sleep,
    }
    local loop = mqtt.get_ioloop(autocreate, loop_options)
    loop:add(client)
