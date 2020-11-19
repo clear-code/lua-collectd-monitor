@@ -1,20 +1,25 @@
 # lua-collectd-monitor
 
-A collectd plugin which provides monitoring feature.
+collectd plugins which provides fault recovery feature written in Lua.
 We are planning to provide following 2 plugins:
 
 * monitor-remote.lua
-  * Receive a pre-defined command from a remote host via MQTT and execute it.
+  * Receive pre-defined recovery commands from a remote host via MQTT and execute them.
+  * This plugin itself doesn't have the feature to detect system faults.
+  * It aims to detect system faults by another host which receives metrics data via collectd's network plugin, and send recovery commands from the host to this plugin.
 * monitor-local.lua
   * Not implemented yet
+  * It will provide features that detecting system faults according to metrics data collected by local collectd daemon, and executing recovery commands.
 
 ## Prerequisites
 
-* You need to install customized version of collectd
-  * https://github.com/clear-code/collectd/tree/cc-luajit
-    * Required additional callback functions are supported in `cc-luajit` branch.
 * Lua or LuaJIT
   * LuaJIT 2.1.0-beta3 is verified
+* LuaRocks
+* collectd
+  * You need to install customized version of collectd:
+    https://github.com/clear-code/collectd/tree/cc-luajit
+  * Required additional callback functions are supported in `cc-luajit` branch.
 * MQTT Broker
   * [VerneMQ](https://vernemq.com/) is verified
   * At least 2 topics should be accessible
@@ -46,7 +51,7 @@ $ sudo luarocks make
   </Module>
 </Plugin>
 ```
-* Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to define available commands
+* Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to define available recovery commands
 
 ## Testing remote command
 
