@@ -40,13 +40,57 @@ collectd.register_config(
    end
 )
 
+-- Poll MQTT messages and handle commands in another thread.
+-- Since it will be called by cqueues.thread, it can't refer parent objects,
+-- it can just only receive string arguments from the caller.
+-- refs:
+--   https://github.com/wahern/cqueues
+--   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
+local monitor_thread = function(pipe, conf_json, load_path)
+   local inspect = require('inspect')
+   local lunajson = require('lunajson')
+   local conf = lunajson.decode(conf_json)
+
+   if load_path then
+      package.path = load_path
+   end
+
+   local logger
+   local log_level = string.lower(conf.LogLevel or "warn")
+   local log_device = string.lower(conf.LogDevice or "syslog")
+
+   if log_device == "stdout" or log_device == "console" then
+      logger = require('logging.console')()
+   else
+      logger = require('logging.syslog')("collectd-monitor-remote")
+   end
+   if log_level == "debug" then
+      logger:setLevel(logger.DEBUG)
+   elseif log_level == "info" then
+      logger:setLevel(logger.INFO)
+   elseif log_level == "warn" or log_level == "warning"then
+      logger:setLevel(logger.WARN)
+   elseif log_level == "err" or log_level == "error" then
+      logger:setLevel(logger.ERROR)
+   elseif log_level == "fatal" then
+      logger:setLevel(logger.FATAL)
+   end
+
+   local ret, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf, logger)
+
+   if err then
+      logger:error(err)
+   end
+end
+
 collectd.register_init(
    function()
       collectd.log_debug("monitor-remote.lua: init")
       local conf = monitor_config
       monitor_thread, monitor_thread_pipe =
-         require('cqueues.thread').start(require('collectd/monitor/mqtt-thread'),
-                                         monitor_config_json)
+         require('cqueues.thread').start(monitor_thread,
+                                         monitor_config_json,
+                                         package.path)
       return 0
    end
 )

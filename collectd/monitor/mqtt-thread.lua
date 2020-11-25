@@ -1,39 +1,8 @@
--- Poll MQTT messages and handle commands in another thread.
--- Since it will be called by cqueues.thread, it can't refer parent objects,
--- it can just only receive string arguments from the caller.
--- refs:
---   https://github.com/wahern/cqueues
---   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
-function monitor_thread(monitor_thread_pipe, monitor_config_json, load_path)
-   if load_path then
-      package.path = load_path
-   end
-
+function mqtt_thread(monitor_thread_pipe, conf, logger)
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
-   local conf = lunajson.decode(monitor_config_json)
    local inspect = require('inspect')
    local command_threads = {}
-   local logger
-   local log_level = string.lower(conf.LogLevel or "warn")
-   local log_device = string.lower(conf.LogDevice or "syslog")
-
-   if log_device == "stdout" or log_device == "console" then
-      logger = require('logging.console')()
-   else
-      logger = require('logging.syslog')("collectd-monitor-remote")
-   end
-   if log_level == "debug" then
-      logger:setLevel(logger.DEBUG)
-   elseif log_level == "info" then
-      logger:setLevel(logger.INFO)
-   elseif log_level == "warn" or log_level == "warning"then
-      logger:setLevel(logger.WARN)
-   elseif log_level == "err" or log_level == "error" then
-      logger:setLevel(logger.ERROR)
-   elseif log_level == "fatal" then
-      logger:setLevel(logger.FATAL)
-   end
 
    function join_messages(...)
       local result = ""
@@ -306,4 +275,4 @@ function monitor_thread(monitor_thread_pipe, monitor_config_json, load_path)
    info("MQTT thread finished")
 end
 
-return monitor_thread
+return mqtt_thread
