@@ -19,22 +19,20 @@ function monitor_thread(monitor_thread_pipe, monitor_config_json, load_path)
    local log_device = string.lower(conf.LogDevice or "syslog")
 
    if log_device == "stdout" or log_device == "console" then
-      require('logging.console')
-      logger = logging.console()
+      logger = require('logging.console')()
    else
-      require('logging.syslog')
-      logger = logging.syslog("collectd-monitor-remote")
+      logger = require('logging.syslog')("collectd-monitor-remote")
    end
    if log_level == "debug" then
-      logger:setLevel(logging.DEBUG)
+      logger:setLevel(logger.DEBUG)
    elseif log_level == "info" then
-      logger:setLevel(logging.INFO)
+      logger:setLevel(logger.INFO)
    elseif log_level == "warn" or log_level == "warning"then
-      logger:setLevel(logging.WARN)
+      logger:setLevel(logger.WARN)
    elseif log_level == "err" or log_level == "error" then
-      logger:setLevel(logging.ERROR)
+      logger:setLevel(logger.ERROR)
    elseif log_level == "fatal" then
-      logger:setLevel(logging.FATAL)
+      logger:setLevel(logger.FATAL)
    end
 
    function join_messages(...)
