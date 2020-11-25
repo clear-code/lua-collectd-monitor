@@ -23,10 +23,10 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
-        ["collectd.monitor-remote"] = "monitor-remote.lua",
-        ["collectd.monitor-local"] = "monitor-local.lua",
-        ["collectd.monitor-thread"] = "monitor-thread.lua",
-        ["collectd.monitor-utils"] = "monitor-utils.lua",
-        ["collectd.send-command"] = "send-command.lua",
+        ["collectd.monitor.remote"] = "collectd/monitor/remote.lua",
+        ["collectd.monitor.local"] = "collectd/monitor/local.lua",
+        ["collectd.monitor.thread"] = "collectd/monitor/mqtt-thread.lua",
+        ["collectd.monitor.utils"] = "collectd/monitor/utils.lua",
+        ["collectd.monitor.send-command"] = "collectd/monitor/send-command.lua",
     },
 }

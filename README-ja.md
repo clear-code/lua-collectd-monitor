@@ -39,9 +39,9 @@ $ sudo luarocks make
   Globals true
 </LoadPlugin>
 <Plugin lua>
-  BasePath "/usr/local/share/lua/5.1/collectd/"
-  Script "monitor-remote.lua"
-  <Module "monitor-remote">
+  BasePath "/usr/local/share/lua/5.1/collectd/monitor"
+  Script "remote.lua"
+  <Module "remote">
     MonitorConfigPath "/opt/collectd/etc/monitor-config.json"
   </Module>
 </Plugin>
@@ -52,5 +52,5 @@ $ sudo luarocks make
 
 * collectdデーモンを起動する
 * 以下の例の様にsend-command.luaを実行する:
-  `$ luajit ./send-command.lua --user test-user --password test-user --topic command-topic hello exec`
-  * 詳細については`luajit ./send-command.lua --help`やソースコードを参照
+  `$ luajit ./collectd/monitor/send-command.lua --user test-user --password test-user --topic command-topic hello exec`
+  * 詳細については`luajit ./collectd/monitor/send-command.lua --help`やソースコードを参照

@@ -1,5 +1,5 @@
 local luaunit = require("luaunit")
-local utils = require("monitor-utils")
+local utils = require("collectd/monitor/utils")
 
 TestUtils = {}
 

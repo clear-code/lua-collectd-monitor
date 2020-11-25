@@ -3,7 +3,7 @@
 --
 
 local lunajson = require('lunajson')
-local utils = require('monitor-utils')
+local utils = require('collectd/monitor/utils')
 
 local monitor_config_json
 local monitor_thread
@@ -45,7 +45,7 @@ collectd.register_init(
       collectd.log_debug("monitor-remote.lua: init")
       local conf = monitor_config
       monitor_thread, monitor_thread_pipe =
-         require('cqueues.thread').start(require('monitor-thread'),
+         require('cqueues.thread').start(require('collectd/monitor/mqtt-thread'),
                                          monitor_config_json)
       return 0
    end

@@ -39,9 +39,9 @@ $ sudo luarocks make
   Globals true
 </LoadPlugin>
 <Plugin lua>
-  BasePath "/usr/local/share/lua/5.1/collectd/"
-  Script "monitor-remote.lua"
-  <Module "monitor-remote">
+  BasePath "/usr/local/share/lua/5.1/collectd/monitor"
+  Script "remote.lua"
+  <Module "remote">
     MonitorConfigPath "/opt/collectd/etc/monitor-config.json"
   </Module>
 </Plugin>
@@ -52,5 +52,5 @@ $ sudo luarocks make
 
 * Start collectd daemon
 * Execute send-command.lua like the following example:
-  `$ luajit ./send-command.lua --user test-user --password test-user --topic command-topic hello exec`
-  * See `luajit ./send-command.lua --help` and its source code for more details
+  `$ luajit ./collectd/monitor/send-command.lua --user test-user --password test-user --topic command-topic hello exec`
+  * See `luajit ./collectd/monitor/send-command.lua --help` and its source code for more details
