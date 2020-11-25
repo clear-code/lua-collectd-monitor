@@ -9,7 +9,7 @@ local monitor_config_json
 local monitor_thread
 local monitor_thread_pipe
 local default_config = {
-   ClearSession = false,
+   CleanSession = false,
    QoS = 2,
 }
 
