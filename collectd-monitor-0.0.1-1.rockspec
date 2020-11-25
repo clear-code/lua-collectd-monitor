@@ -25,7 +25,7 @@ build = {
     modules = {
         ["collectd.monitor.remote"] = "collectd/monitor/remote.lua",
         ["collectd.monitor.local"] = "collectd/monitor/local.lua",
-        ["collectd.monitor.thread"] = "collectd/monitor/mqtt-thread.lua",
+        ["collectd.monitor.mqtt-thread"] = "collectd/monitor/mqtt-thread.lua",
         ["collectd.monitor.utils"] = "collectd/monitor/utils.lua",
         ["collectd.monitor.send-command"] = "collectd/monitor/send-command.lua",
     },
