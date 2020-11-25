@@ -1,4 +1,15 @@
 {
+  "Host": "localhost:1883",
+  "User": "test-user",
+  "Password": "test-user",
+  "Secure": false,
+  "CleanSession": false,
+  "ReconnectInterval": 5,
+  "QoS": 2,
+  "CommandTopic": "test-topic",
+  "CommandResultTopic": "test-result-topic",
+  "LogLevel": "debug",
+  "LogDevice": "stdout",
   "services": {
     "nginx": {
       "commands" : {

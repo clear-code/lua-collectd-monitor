@@ -42,16 +42,11 @@ $ sudo luarocks make
   BasePath "/usr/local/share/lua/5.1/collectd/"
   Script "monitor-remote.lua"
   <Module "monitor-remote">
-    Host "localhost"
-    User "test-user"
-    Password "test-user"
-    CommandTopic "command-topic"
-    CommandResultTopic "result-topic"
     MonitorConfigPath "/opt/collectd/etc/monitor-config.json"
   </Module>
 </Plugin>
 ```
-* conf/monitor-config.jsonを/opt/collectd/etc/にコピーし、内容を編集して必要なリカバリコマンドを定義する
+* conf/monitor-config.jsonを/opt/collectd/etc/にコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
 
 ## リモートコマンドのテスト
 

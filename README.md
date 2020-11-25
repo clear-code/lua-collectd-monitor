@@ -42,16 +42,11 @@ $ sudo luarocks make
   BasePath "/usr/local/share/lua/5.1/collectd/"
   Script "monitor-remote.lua"
   <Module "monitor-remote">
-    Host "localhost"
-    User "test-user"
-    Password "test-user"
-    CommandTopic "command-topic"
-    CommandResultTopic "result-topic"
     MonitorConfigPath "/opt/collectd/etc/monitor-config.json"
   </Module>
 </Plugin>
 ```
-* Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to define available recovery commands
+* Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to set connection settings to MQTT broker and define available recovery commands
 
 ## Testing remote command
 

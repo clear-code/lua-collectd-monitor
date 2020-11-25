@@ -2,18 +2,31 @@
 -- Register collectd callback functions
 --
 
+local lunajson = require('lunajson')
+local utils = require('monitor-utils')
+
 local monitor_config_json
 local monitor_thread
 local monitor_thread_pipe
+local default_config = {
+   ClearSession = false,
+   QoS = 2,
+}
 
 collectd.register_config(
-   function(conf)
+   function(collectd_conf)
       collectd.log_debug("monitor-remote.lua: config")
 
-      conf.ClearSession = conf.ClearSession or false
-      conf.QoS = conf.QoS or 2
+      local conf = utils.copy_table(default_config)
+      utils.merge_table(conf, collectd_conf)
+      if conf.MonitorConfigPath then
+         local monitor_config, err_msg = utils.load_config(conf.MonitorConfigPath)
+         if err_msg then
+            collectd.log_error(err_msg)
+         end
+         utils.merge_table(conf, monitor_config)
+      end
 
-      local lunajson = require('lunajson')
       monitor_config_json = lunajson.encode(conf)
 
       local debug_config_json = monitor_config_json
