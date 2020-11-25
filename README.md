@@ -18,8 +18,8 @@ We are planning to provide following 2 plugins:
 * LuaRocks
 * collectd
   * You need to install customized version of collectd:
-    https://github.com/clear-code/collectd/tree/cc-luajit
-  * Required additional callback functions are supported in `cc-luajit` branch.
+    https://github.com/clear-code/collectd/tree/cc-5.12.0-20201124
+  * Required additional callback functions are supported in this branch.
 * MQTT Broker
   * [VerneMQ](https://vernemq.com/) is verified
   * At least 2 topics should be accessible
