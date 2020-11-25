@@ -52,5 +52,5 @@ $ sudo luarocks make
 
 * collectdデーモンを起動する
 * 以下の例の様にsend-command.luaを実行する:
-  `$ luajit ./collectd/monitor/send-command.lua --user test-user --password test-user --topic command-topic hello exec`
+  `$ luajit ./collectd/monitor/send-command.lua --user test-user --password test-user --topic test-topic --result-topic test-result-topic hello exec`
   * 詳細については`luajit ./collectd/monitor/send-command.lua --help`やソースコードを参照

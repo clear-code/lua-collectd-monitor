@@ -14,6 +14,7 @@ parser:option("-p --password", "Password for the MQTT user")
 parser:flag("-s --secure", "Use TLS", false)
 parser:option("-q --qos", "QoS for the command", 2)
 parser:option("-t --topic", "Topic to send")
+parser:option("-r --result-topic", "Topic to receive command result")
 
 local args = parser:parse()
 
@@ -25,6 +26,22 @@ local client = mqtt.client {
    clean = false,
 }
 
+function subscribe()
+   if not args.result_topic then
+      return
+   end
+
+   local subscribe_options = {
+      topic = args.result_topic,
+      qos = tonumber(args.qos),
+   }
+
+   local packet_id, err = client:subscribe(subscribe_options)
+   if not packet_id then
+      print("Failed to subscribe: " .. err)
+   end
+end
+
 client:on {
    connect = function(reply)
       if reply.rc ~= 0 then
@@ -32,6 +49,8 @@ client:on {
                          reply:reason_string(), "\n")
          return
       end
+
+      subscribe()
 
       math.randomseed(os.clock())
       local command = {
@@ -42,23 +61,30 @@ client:on {
       }
       local command_json = lunajson.encode(command)
 
-      local options = {
+      print("Send command: " .. command_json)
+
+      local publish_options = {
          topic = args.topic,
          payload = command_json,
          qos = tonumber(args.qos),
          callback = function(packet)
             print(inspect(packet))
-            client:disconnect()
+            if not args.result_topic then
+               client:disconnect()
+            end
          end,
       }
+      client:publish(publish_options)
+   end,
 
-      print("Send command: " .. command_json)
-
-      client:publish(options)
+   message = function(packet)
+      print("Received a result: " .. inspect(packet))
+      client:disconnect()
    end,
 
    error = function(msg)
       io.stderr:write(msg, "\n")
+      client:disconnect()
    end,
 }
 
