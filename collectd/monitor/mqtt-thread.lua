@@ -132,14 +132,14 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
       file:close()
 
       local succeeded, monitor_settings = pcall(lunajson.decode, content)
-      if not succeeded or not monitor_settings or not monitor_settings["services"] then
+      if not succeeded or not monitor_settings or not monitor_settings["Services"] then
          err_msg = "Cannot handle \"" .. command_name .. "\" command: No service is configured!"
          error(err_msg)
          send_reply(task_id, ERROR_NO_CONFIG, err_msg)
          return
       end
 
-      local service_settings = monitor_settings["services"][service_name]
+      local service_settings = monitor_settings["Services"][service_name]
 
       if not service_settings then
          err_msg = "Cannot find the service settings for: " .. service_name

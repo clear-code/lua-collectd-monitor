@@ -8,7 +8,7 @@
   "QoS": 2,
   "CommandTopic": "test-topic",
   "CommandResultTopic": "test-result-topic",
-  "services": {
+  "Services": {
     "nginx": {
       "commands" : {
         "restart": "systemctl restart nginx 2>&1"
