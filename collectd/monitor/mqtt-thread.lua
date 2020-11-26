@@ -208,7 +208,7 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
          {
             task_id = task_id,
             code = code,
-            messge = msg,
+            message = msg,
             timestamp = os.date("!%Y-%m-%dT%TZ"),
          }
       )
