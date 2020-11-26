@@ -8,8 +8,6 @@
   "QoS": 2,
   "CommandTopic": "test-topic",
   "CommandResultTopic": "test-result-topic",
-  "LogLevel": "debug",
-  "LogDevice": "stdout",
   "services": {
     "nginx": {
       "commands" : {
