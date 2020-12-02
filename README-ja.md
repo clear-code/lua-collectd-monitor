@@ -93,7 +93,7 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 
 メッセージ例:
 
-```
+```json
 {
   "task_id": 3126260400,
   "timestamp": "2020-11-26T00:41:19Z",
@@ -115,7 +115,7 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 
 メッセージ例:
 
-```
+```json
 {
   "task_id":3126260400,
   "timestamp": "2020-11-26T00:41:19Z",
