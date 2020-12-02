@@ -29,7 +29,7 @@
 ## インストール
 
 * lua-collectd-monitorをダウンロードしてインストールする:
-```shell
+```console
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
@@ -51,6 +51,84 @@ $ sudo luarocks make
 ## リモートコマンドのテスト
 
 * collectdデーモンを起動する
-* 以下の例の様にsend-command.luaを実行する:
-  `$ luajit ./collectd/monitor/send-command.lua --user test-user --password test-user --topic test-topic --result-topic test-result-topic hello exec`
-  * 詳細については`luajit ./collectd/monitor/send-command.lua --help`やソースコードを参照
+* 以下の例の様にsend-command.luaを実行するとコマンドが送付され、その実行結果を得ることができる。
+```console
+$ luajit /usr/local/share/lua/5.1/collectd/monitor/send-command.lua \
+  hello \
+  exec \
+  --host 192.168.55.1 \
+  --user test-user \
+  --password test-user \
+  --topic test-topic \
+  --result-topic test-result-topic
+Send command: {"timestamp":"2020-11-26T00:41:19Z","service":"hello","task_id":3126260400,"command":"exec"}
+{ -- PUBREC{type=5, packet_id=2}
+  packet_id = 2,
+  type = 5,
+  <metatable> = {
+    __tostring = <function 1>
+  }
+}
+Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="{\\"timestamp\\":\\"2020-11-26T00:41:19Z\\",\\"message\\":\\"Hello World!\\",\\"task_id\\":3126260400,\\"code\\":0}", topic="test-result-topic", retain=false}
+  dup = false,
+  packet_id = 1,
+  payload = '{"timestamp":"2020-11-26T00:41:19Z","message":"Hello World!","task_id":3126260400,"code":0}',
+  qos = 2,
+  retain = false,
+  topic = "test-result-topic",
+  type = 3,
+  <metatable> = {
+    __tostring = <function 1>
+  }
+}
+```
+* 詳細については`luajit ./collectd/monitor/send-command.lua --help`やソースコードを参照のこと
+
+## リモートコマンドのメッセージ形式
+
+リモートコマンドおよび実行結果のメッセージ形式はJSONです。
+それぞれのメッセージ例とメンバー定義を以下に示します。
+
+### コマンドメッセージ
+
+メッセージ例:
+
+```
+{
+  "task_id": 3126260400,
+  "timestamp": "2020-11-26T00:41:19Z",
+  "service": "hello",
+  "command": "exec"
+}
+```
+
+メンバー:
+
+| フィールド | タイプ | 内容 |
+|------------|--------|------|
+| task_id    | 数値   | コマンド送信者によって割り振られる一意のタスクID |
+| timestamp  | 文字列 | コマンドのタイムスタンプ（ISO8601形式UTC）|
+| service    | 文字列 | monitor-config.jsonで定義されているサービス名 |
+| command    | 文字列 | monitor-config.jsonで定義されているコマンド名 |
+
+### コマンド結果メッセージ
+
+メッセージ例:
+
+```
+{
+  "task_id":3126260400,
+  "timestamp": "2020-11-26T00:41:19Z",
+  "message": "Hello World!",
+  "code": 0
+}
+```
+
+メンバー:
+
+| フィールド | タイプ | 内容 |
+|------------|--------|------|
+| task_id    | 数値   | コマンド送信者によって割り振られる一意のタスクID |
+| timestamp  | 文字列 | コマンド結果のタイムスタンプ（ISO8601形式UTC）|
+| message    | 文字列 | コマンドのメッセージ（標準出力） |
+| code       | 数値   | コマンドの終了ステータス |
