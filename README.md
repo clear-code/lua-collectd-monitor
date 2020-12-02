@@ -93,7 +93,7 @@ Here is the example and member definitions of these messages:
 
 An example:
 
-```
+```json
 {
   "task_id": 3126260400,
   "timestamp": "2020-11-26T00:41:19Z",
@@ -115,7 +115,7 @@ Members:
 
 An example:
 
-```
+```json
 {
   "task_id":3126260400,
   "timestamp": "2020-11-26T00:41:19Z",
