@@ -9,6 +9,15 @@
   "CommandTopic": "test-topic",
   "CommandResultTopic": "test-result-topic",
   "Services": {
+    "collectd": {
+      "Path": "/opt/collectd/sbin/collectd",
+      "ConfigPath": "/opt/collectd/etc/collectd.conf",
+      "PIDPath": "/opt/collectd/var/run/collectd.pid",
+      "commands" : {
+        "start": "systemctl start collectd 2>&1",
+        "stop": "systemctl stop collectd 2>&1"
+      }
+    },
     "nginx": {
       "commands" : {
         "restart": "systemctl restart nginx 2>&1"
