@@ -76,7 +76,17 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
          end
 
          function is_valid_message(msg)
-            return msg and msg.task_id and msg.service and msg.command
+            if not msg or not msg.task_id then
+               return false
+            end
+
+            if msg.service and msg.command then
+               return true
+            elseif msg.config then
+               return true
+            else
+               return false
+            end
          end
 
          succeeded, msg = pcall(lunajson.decode, packet.payload)
@@ -88,8 +98,13 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
             return
          end
 
-         debug("Received a command: ", msg.command, ", task_id: ", msg.task_id)
-         dispatch_command(msg.task_id, msg.service, msg.command)
+         if msg.command then
+            debug("Received a command: ", msg.command, ", task_id: ", msg.task_id)
+            dispatch_command(msg.task_id, msg.service, msg.command)
+         elseif msg.config then
+            debug("Received a config: ", msg.config, ", task_id: ", msg.task_id)
+         end
+         dispatch_config(msg.task_id, msg.config)
       end,
 
       acknowledge = function(packet)
@@ -197,6 +212,10 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
       }
 
       thread_pipe:write(require('lunajson').encode(result) .. "\n")
+   end
+
+   function dispatch_config(task_id, config)
+      debug("Received a config:\n", config)
    end
 
    function send_reply(task_id, code, msg)
