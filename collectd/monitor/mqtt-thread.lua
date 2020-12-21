@@ -187,7 +187,7 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
 
       local command_output = ""
       for i = 1, #lines - 1 do
-         command_output = command_output .. lines[i]
+         command_output = command_output .. "\n" .. lines[i]
       end
 
       local result = {
