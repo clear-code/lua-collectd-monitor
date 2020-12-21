@@ -38,4 +38,21 @@ utils.copy_table = function(conf)
    return utils.merge_table(nil, conf)
 end
 
+utils.file_exists = function(path)
+   local file = io.open(path, "r")
+   if file then
+      file:close()
+      return true
+   else
+      return false
+   end
+end
+
+utils.run_command = function(command_line)
+   local command_output = io.popen(command_line):read("*a")
+   local status = io.popen("echo $?"):read("*a")
+   local code = tonumber(status)
+   return code, command_output
+end
+
 return utils
