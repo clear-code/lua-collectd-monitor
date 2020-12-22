@@ -46,7 +46,7 @@ collectd.register_config(
 -- refs:
 --   https://github.com/wahern/cqueues
 --   https://raw.githubusercontent.com/wahern/cqueues/master/doc/cqueues.pdf
-local monitor_thread = function(pipe, conf_json, load_path)
+local monitor_thread_func = function(pipe, conf_json, load_path)
    local inspect = require('inspect')
    local lunajson = require('lunajson')
    local conf = lunajson.decode(conf_json)
@@ -88,7 +88,7 @@ collectd.register_init(
       collectd.log_debug("monitor-remote.lua: init")
       local conf = monitor_config
       monitor_thread, monitor_thread_pipe =
-         require('cqueues.thread').start(monitor_thread,
+         require('cqueues.thread').start(monitor_thread_func,
                                          monitor_config_json,
                                          package.path)
       return 0
