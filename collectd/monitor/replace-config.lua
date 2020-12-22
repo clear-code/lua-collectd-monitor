@@ -22,8 +22,13 @@ local options = {
    PIDPath = args.pid_file,
 }
 
+local logger_options = {
+   LogDevice = "stdout",
+   LogLevel = "debug",
+}
+
 local Replacer = require('collectd/monitor/config-replacer')
-local replacer = Replacer.new(config, options)
+local replacer = Replacer.new(config, options, logget_options)
 local replaceable, err = replacer:prepare()
 if not replaceable then
    print(err)
