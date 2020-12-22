@@ -10,7 +10,7 @@
   "CommandResultTopic": "test-result-topic",
   "Services": {
     "collectd": {
-      "Path": "/opt/collectd/sbin/collectd",
+      "CommandPath": "/opt/collectd/sbin/collectd",
       "ConfigPath": "/opt/collectd/etc/collectd.conf",
       "PIDPath": "/opt/collectd/var/run/collectd.pid",
       "commands" : {
