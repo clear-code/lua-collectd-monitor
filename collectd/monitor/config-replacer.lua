@@ -187,9 +187,9 @@ function run(self)
    end
 end
 
-ConfigReplacer.new = function(collectd_config, options)
+ConfigReplacer.new = function(collectd_config, options, logger_options)
    local replacer = {}
-   local logger_options = {
+   logger_options = logger_options or {
       LogDevice = "stdout",
       LogLevel = "debug",
    }
