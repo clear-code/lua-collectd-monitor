@@ -189,9 +189,13 @@ end
 
 ConfigReplacer.new = function(collectd_config, options)
    local replacer = {}
-   replacer.logger = require('logging.console')()
-   replacer.logger:setLevel(replacer.logger.DEBUG)
+   local logger_options = {
+      LogDevice = "stdout",
+      LogLevel = "debug",
+   }
    replacer.options = options
+   replacer.logger = utils.get_logger("collectd-config-replacer",
+                                      logger_options)
    replacer.collectd_config = collectd_config
    replacer.prepare = prepare
    replacer.run = run

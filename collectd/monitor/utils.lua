@@ -55,4 +55,33 @@ utils.run_command = function(command_line)
    return code, command_output
 end
 
+utils.get_logger = function(name, conf)
+   conf = conf or {}
+
+   local logger
+   local log_level = string.lower(conf.LogLevel or "warn")
+   local log_device = string.lower(conf.LogDevice or "syslog")
+
+   if log_device == "stdout" or log_device == "console" then
+      logger = require('logging.console')()
+   else
+      local logging = require('logging')
+      require('logging.syslog')
+      logger = logging.syslog(name)
+   end
+   if log_level == "debug" then
+      logger:setLevel(logger.DEBUG)
+   elseif log_level == "info" then
+      logger:setLevel(logger.INFO)
+   elseif log_level == "warn" or log_level == "warning"then
+      logger:setLevel(logger.WARN)
+   elseif log_level == "err" or log_level == "error" then
+      logger:setLevel(logger.ERROR)
+   elseif log_level == "fatal" then
+      logger:setLevel(logger.FATAL)
+   end
+
+   return logger
+end
+
 return utils
