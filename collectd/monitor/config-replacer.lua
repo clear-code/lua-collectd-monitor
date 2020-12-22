@@ -1,6 +1,4 @@
 local utils = require('collectd/monitor/utils')
-local logger = require('logging.console')()
-logger:setLevel(logger.DEBUG)
 
 local ConfigReplacer = {}
 
@@ -92,25 +90,25 @@ function ensure_remove_pid_file(self)
 end
 
 function recover_old_config(self)
-   logger:info("Trying to recover old config ...")
+   self:info("Trying to recover old config ...")
    local succeeded, err = os.rename(self:old_config_path(), self:config_path())
    if not succeeded then
-      logger:error("Failed to recover old config file!: " .. err)
+      self:error("Failed to recover old config file!: " .. err)
       return false
    end
 
    succeeded, err = collectd_start(self)
    if not succeeded then
-      logger:error("Failed to start collectd with old config!: " .. err)
+      self:error("Failed to start collectd with old config!: " .. err)
       return false
    end
 
    pid = collectd_pid(self)
    if pid then
-      logger:debug("collectd has been restarted with old config. PID: " .. pid)
+      self:debug("collectd has been restarted with old config. PID: " .. pid)
       return true
    else
-      logger:error("Failed to recover old confog: Failed to get new pid of collectd!")
+      self:error("Failed to recover old confog: Failed to get new pid of collectd!")
       return false
    end
 end
@@ -146,51 +144,53 @@ function run(self)
    -- check the running process
    local pid = collectd_pid(self)
    if pid and collectd_is_running(self) then
-      logger:debug("collectd is running with PID " .. pid)
+      self:debug("collectd is running with PID " .. pid)
       local succeeded, err = collectd_stop(self)
       if not succeeded then
-         logger:error("Failed to stop collectd!: " .. err)
+         self:error("Failed to stop collectd!: " .. err)
          os.exit(1)
       end
    end
 
    if not ensure_remove_pid_file(self) then
-      logger:error("Failed to remove pid file of collectd!")
+      self:error("Failed to remove pid file of collectd!")
       os.exit(1)
    end
 
    -- save old config
    succeeded, err = os.rename(self:config_path(), self:old_config_path())
    if not succeeded then
-      logger:error("Failed to back up old config file!: " .. err)
+      self:error("Failed to back up old config file!: " .. err)
       os.exit(1)
    end
 
    -- replace with new config
    succeeded, err = os.rename(self:new_config_path(), self:config_path())
    if not succeeded then
-      logger:error("Failed to replace config file!: " .. err)
+      self:error("Failed to replace config file!: " .. err)
       os.exit(1)
    end
 
    -- try to restart
    succeeded, err = collectd_start(self)
    if not succeeded then
-      logger:error("Failed to start collectd!: " .. err)
+      self:error("Failed to start collectd!: " .. err)
       recover_old_config(self)
       os.exit(1)
    end
 
    pid = collectd_pid(self)
    if pid then
-      logger:debug("collectd has been restarted with PID " .. pid)
+      self:debug("collectd has been restarted with PID " .. pid)
    else
-      logger:error("Failed to get new pid of collectd!")
+      self:error("Failed to get new pid of collectd!")
    end
 end
 
 ConfigReplacer.new = function(collectd_config, options)
    local replacer = {}
+   replacer.logger = require('logging.console')()
+   replacer.logger:setLevel(replacer.logger.DEBUG)
    replacer.options = options
    replacer.collectd_config = collectd_config
    replacer.prepare = prepare
@@ -223,6 +223,20 @@ ConfigReplacer.new = function(collectd_config, options)
          return "kill " .. collectd_pid(self) .. " 2>&1"
       end
    end
+
+   replacer.debug = function(self, ...)
+      self.logger:debug(...)
+   end
+   replacer.info = function(...)
+      self.logger:info(...)
+   end
+   replacer.warn = function(self, ...)
+      self.logger:warn(...)
+   end
+   replacer.error = function(self, ...)
+      self.logger:error(...)
+   end
+
    return replacer
 end
 
