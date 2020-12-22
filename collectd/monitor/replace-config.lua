@@ -28,7 +28,7 @@ local logger_options = {
 }
 
 local Replacer = require('collectd/monitor/config-replacer')
-local replacer = Replacer.new(config, options, logget_options)
+local replacer = Replacer.new(0, config, options, logget_options)
 local replaceable, err = replacer:prepare()
 if not replaceable then
    print(err)

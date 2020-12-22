@@ -187,7 +187,7 @@ function run(self)
    end
 end
 
-ConfigReplacer.new = function(collectd_config, options, logger_options)
+ConfigReplacer.new = function(task_id, collectd_config, options, logger_options)
    local replacer = {}
    replacer.options = options
    replacer.logger = utils.get_logger("collectd-config-replacer",
