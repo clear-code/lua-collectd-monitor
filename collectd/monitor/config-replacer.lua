@@ -234,7 +234,7 @@ ConfigReplacer.new = function(task_id, collectd_config, options, logger_options)
    replacer.debug = function(self, ...)
       self.logger:debug(...)
    end
-   replacer.info = function(...)
+   replacer.info = function(self, ...)
       self.logger:info(...)
    end
    replacer.warn = function(self, ...)
