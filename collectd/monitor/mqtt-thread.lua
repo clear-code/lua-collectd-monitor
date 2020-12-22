@@ -103,8 +103,8 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
             dispatch_command(msg.task_id, msg.service, msg.command)
          elseif msg.config then
             debug("Received a config: ", msg.config, ", task_id: ", msg.task_id)
+            dispatch_config(msg.task_id, msg.config)
          end
-         dispatch_config(msg.task_id, msg.config)
       end,
 
       acknowledge = function(packet)
