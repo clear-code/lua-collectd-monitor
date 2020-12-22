@@ -1,4 +1,5 @@
 local utils = require('collectd/monitor/utils')
+local unix = require('unix')
 
 local ConfigReplacer = {}
 
@@ -7,17 +8,31 @@ function sleep(sec)
 end
 
 function collectd_pid(self)
-   local file, err = io.open(self:pid_path())
-   if not file then
-      return nil, err
+   local code, output = utils.run_command("/bin/cat " .. self:pid_path() .. " 2>&1")
+   if code ~= 0 then
+      return nil, output
    end
-   local pid_string = file:read("*a")
-   file:close()
-   local pid = tonumber(pid_string)
+   local pid = tonumber(output)
    if pid and pid > 0 then
       return pid
    end
    return nil
+end
+
+function rename_file(src, dest)
+   local code, err = utils.run_command("/bin/mv \"" .. src .. "\" \"" .. dest .. "\" 2>&1")
+   if code ~= 0 then
+      return false, err
+   end
+   return true
+end
+
+function remove_file(path)
+   local code, err = utils.run_command("/bin/rm -f \"" .. path .. "\" >2&1")
+   if code ~= 0 then
+      return false, err
+   end
+   return true
 end
 
 function collectd_is_running(self, pid)
@@ -25,7 +40,7 @@ function collectd_is_running(self, pid)
    if not pid then
       return false
    end
-   local result = os.execute("ps " .. pid .. " > /dev/null 2>&1")
+   local result = utils.run_command("ps " .. pid .. " > /dev/null 2>&1")
    return result == 0
 end
 
@@ -78,20 +93,20 @@ function collectd_stop(self)
          return true
       end
    end
-   return false, "Cannot to detect removing pid file of collectd!"
+   return false, "Cannot detect removing pid file of collectd!"
 end
 
 function ensure_remove_pid_file(self)
    local pid_path = self:pid_path()
    if utils.file_exists(pid_path) then
-      os.remove(pid_path)
+      remove_file(pid_path)
    end
    return not utils.file_exists(pid_path)
 end
 
 function recover_old_config(self)
    self:info("Trying to recover old config ...")
-   local succeeded, err = os.rename(self:old_config_path(), self:config_path())
+   local succeeded, err = rename_file(self:old_config_path(), self:config_path())
    if not succeeded then
       self:error("Failed to recover old config file!: " .. err)
       return false
@@ -133,7 +148,7 @@ function prepare(self)
    local succeeded, err = collectd_dry_run(self)
    if not succeeded then
       message = "New config seems broken!: " .. err
-      os.remove(new_config_path)
+      remove_file(new_config_path)
       return false, message
    end
 
@@ -143,20 +158,23 @@ end
 function abort(self)
    local new_config_path = self:new_config_path()
    -- TODO: Check a running process
-   os.remove(new_config_path)
+   remove_file(new_config_path)
 end
 
 function run(self)
    -- check the running process
-   local pid = collectd_pid(self)
-   if pid and collectd_is_running(self) then
-      self:debug("collectd is running with PID " .. pid)
+   local old_pid, err = collectd_pid(self)
+   if old_pid and collectd_is_running(self, old_pid) then
+      self:debug("collectd is running with PID " .. old_pid)
       local succeeded, err = collectd_stop(self)
       if not succeeded then
          self:error("Failed to stop collectd!: " .. err)
          os.exit(1)
       end
+   else
+      self:debug("collectd isn't running.", err)
    end
+
 
    if not ensure_remove_pid_file(self) then
       self:error("Failed to remove pid file of collectd!")
@@ -164,14 +182,14 @@ function run(self)
    end
 
    -- save old config
-   succeeded, err = os.rename(self:config_path(), self:old_config_path())
+   succeeded, err = rename_file(self:config_path(), self:old_config_path())
    if not succeeded then
       self:error("Failed to back up old config file!: " .. err)
       os.exit(1)
    end
 
    -- replace with new config
-   succeeded, err = os.rename(self:new_config_path(), self:config_path())
+   succeeded, err = rename_file(self:new_config_path(), self:config_path())
    if not succeeded then
       self:error("Failed to replace config file!: " .. err)
       os.exit(1)
