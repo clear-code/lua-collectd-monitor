@@ -1,4 +1,5 @@
 function mqtt_thread(monitor_thread_pipe, conf, logger)
+   local ConfigReplacer = require('collectd/monitor/config-replacer')
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
    local inspect = require('inspect')
@@ -125,10 +126,12 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    }
 
    function dispatch_command(task_id, service_name, command_name)
+      local ERROR_NOT_IMPLEMENTED  = 0x1000
       local ERROR_NO_CONFIG  = 0x1001
       local ERROR_NO_SERVICE = 0x1002
       local ERROR_NO_COMMAND = 0x1003
       local ERROR_DUPLICATE_TASK_ID = 0x1100
+      local ERROR_CANNOT_REPLACE_CONFIG = 0x2000
 
       if command_threads[task_id] then
          local err_msg = "Received duplicate task_id: " .. tostring(task_id)
@@ -203,7 +206,22 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function dispatch_config(task_id, config)
-      debug("Received a config:\n", config)
+      local replacer = ConfigReplacer.new(task_id, config, conf.Services.collectd)
+      local replaceable, err = replacer:prepare()
+      local message
+      if not replaceable then
+         message = "Cannot replace the collectd config: " .. err
+         error(message)
+         send_reply(task_id, ERROR_CANNOT_REPLACE_CONFIG, message)
+         return
+      end
+
+      -- TODO: execute replacer:run() in another process
+      replacer:abort()
+
+      message = "Not implemented yet"
+      info(message)
+      send_reply(task_id, ERROR_NOT_IMPLEMENTED, message)
    end
 
    function send_reply(task_id, code, msg)

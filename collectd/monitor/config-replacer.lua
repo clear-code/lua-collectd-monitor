@@ -140,6 +140,12 @@ function prepare(self)
    return true
 end
 
+function abort(self)
+   local new_config_path = self:new_config_path()
+   -- TODO: Check a running process
+   os.remove(new_config_path)
+end
+
 function run(self)
    -- check the running process
    local pid = collectd_pid(self)
@@ -195,6 +201,7 @@ ConfigReplacer.new = function(task_id, collectd_config, options, logger_options)
    replacer.collectd_config = collectd_config
    replacer.prepare = prepare
    replacer.run = run
+   replacer.abort = abort
    replacer.config_path = function(self)
       return self.options.ConfigPath
    end
