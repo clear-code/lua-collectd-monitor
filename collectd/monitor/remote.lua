@@ -49,33 +49,14 @@ collectd.register_config(
 local monitor_thread_func = function(pipe, conf_json, load_path)
    local inspect = require('inspect')
    local lunajson = require('lunajson')
+   local utils = require('collectd/monitor/utils')
    local conf = lunajson.decode(conf_json)
 
    if load_path then
       package.path = load_path
    end
 
-   local logger
-   local log_level = string.lower(conf.LogLevel or "warn")
-   local log_device = string.lower(conf.LogDevice or "syslog")
-
-   if log_device == "stdout" or log_device == "console" then
-      logger = require('logging.console')()
-   else
-      logger = require('logging.syslog')("collectd-monitor-remote")
-   end
-   if log_level == "debug" then
-      logger:setLevel(logger.DEBUG)
-   elseif log_level == "info" then
-      logger:setLevel(logger.INFO)
-   elseif log_level == "warn" or log_level == "warning"then
-      logger:setLevel(logger.WARN)
-   elseif log_level == "err" or log_level == "error" then
-      logger:setLevel(logger.ERROR)
-   elseif log_level == "fatal" then
-      logger:setLevel(logger.FATAL)
-   end
-
+   local logger = utils.get_logger("collectd-monitor-remote", conf)
    local ret, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf, logger)
 
    if err then
