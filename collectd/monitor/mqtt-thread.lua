@@ -195,13 +195,25 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function run_command(thread_pipe, command_line, task_id)
-      local utils = require('collectd/monitor/utils')
-      local code, command_output = utils.run_command(command_line)
+      local cmdline = command_line .. "; echo $?"
+      local pipe = io.popen(cmdline)
+
+      local lines = {}
+      for line in pipe:lines() do
+         lines[#lines + 1] = line
+      end
+
+      local command_output = ""
+      for i = 1, #lines - 1 do
+         command_output = command_output .. "\n" .. lines[i]
+      end
+
       local result = {
          task_id = tonumber(task_id),
-         code = code,
+         code = tonumber(lines[#lines]),
          message = command_output,
       }
+
       thread_pipe:write(require('lunajson').encode(result) .. "\n")
    end
 
