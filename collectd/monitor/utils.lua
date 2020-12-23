@@ -49,10 +49,20 @@ utils.file_exists = function(path)
 end
 
 utils.run_command = function(command_line)
-   local command_output = io.popen(command_line):read("*a")
-   local status = io.popen("echo $?"):read("*a")
-   local code = tonumber(status)
-   return code, command_output
+   local cmdline = command_line .. "; echo $?"
+   local pipe = io.popen(cmdline)
+
+   local lines = {}
+   for line in pipe:lines() do
+      lines[#lines + 1] = line
+   end
+
+   local command_output = ""
+   for i = 1, #lines - 1 do
+      command_output = command_output .. "\n" .. lines[i]
+   end
+
+   return tonumber(lines[#lines]), command_output
 end
 
 utils.get_logger = function(name, conf)
