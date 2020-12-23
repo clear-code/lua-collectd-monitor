@@ -28,5 +28,7 @@ build = {
         ["collectd.monitor.mqtt-thread"] = "collectd/monitor/mqtt-thread.lua",
         ["collectd.monitor.utils"] = "collectd/monitor/utils.lua",
         ["collectd.monitor.send-command"] = "collectd/monitor/send-command.lua",
+        ["collectd.monitor.config-replacer"] = "collectd/monitor/config-replacer.lua",
+        ["collectd.monitor.replace-config"] = "collectd/monitor/replace-config.lua",
     },
 }
