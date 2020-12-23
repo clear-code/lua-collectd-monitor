@@ -169,7 +169,7 @@ function run(self)
       local succeeded, err = collectd_stop(self)
       if not succeeded then
          self:error("Failed to stop collectd!: " .. err)
-         os.exit(1)
+         return false
       end
    else
       self:debug("collectd isn't running.", err)
@@ -178,21 +178,21 @@ function run(self)
 
    if not ensure_remove_pid_file(self) then
       self:error("Failed to remove pid file of collectd!")
-      os.exit(1)
+      return false
    end
 
    -- save old config
    succeeded, err = rename_file(self:config_path(), self:old_config_path())
    if not succeeded then
       self:error("Failed to back up old config file!: " .. err)
-      os.exit(1)
+      return false
    end
 
    -- replace with new config
    succeeded, err = rename_file(self:new_config_path(), self:config_path())
    if not succeeded then
       self:error("Failed to replace config file!: " .. err)
-      os.exit(1)
+      return false
    end
 
    -- try to restart
@@ -200,14 +200,16 @@ function run(self)
    if not succeeded then
       self:error("Failed to start collectd!: " .. err)
       recover_old_config(self)
-      os.exit(1)
+      return false
    end
 
    pid = collectd_pid(self)
    if pid then
       self:debug("collectd has been restarted with PID " .. pid)
+      return true
    else
       self:error("Failed to get new pid of collectd!")
+      return false
    end
 end
 
