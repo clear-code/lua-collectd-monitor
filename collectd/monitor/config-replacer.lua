@@ -76,10 +76,14 @@ function collectd_start(self)
    return false, "Cannot detect new pid of collectd!"
 end
 
-function collectd_stop(self)
+function collectd_stop(self, ignore_no_pid)
    local pid = collectd_pid(self)
    if not pid then
-      return true
+      if ignore_no_pid then
+         return true
+      else
+         return false, "Cannot find PID of collectd"
+      end
    end
    local result, err = utils.run_command(self:stop_command())
    if result ~= 0 then

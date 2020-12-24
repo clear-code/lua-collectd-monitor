@@ -125,8 +125,8 @@ collectd.register_shutdown(
       monitor_thread_pipe:write("finish\n")
 
       for line in monitor_thread_pipe:lines() do
-         if line == "run-config-replacer" then
-            -- TODO: set proper task ID
+         local task_id = line:match("run-config-replacer")
+         if task_id then
             config_replacer_task_id = 1
          end
       end
