@@ -225,8 +225,8 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function dispatch_config(task_id, config)
-      local replacer = ConfigReplacer.new(task_id, config, conf.Services.collectd)
-      local replaceable, err = replacer:prepare()
+      local replacer = ConfigReplacer.new(task_id, conf.Services.collectd)
+      local replaceable, err = replacer:prepare(config)
       local message
       if not replaceable then
          message = "Cannot replace the collectd config: " .. err
