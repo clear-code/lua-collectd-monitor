@@ -128,7 +128,7 @@ function recover_old_config(self)
    end
 end
 
-function prepare(self)
+function prepare(self, collectd_config)
    local new_config_path = self:new_config_path()
    local message
    if utils.file_exists(new_config_path) then
@@ -141,7 +141,7 @@ function prepare(self)
       message = "Failed to write new config: " .. err
       return false, message
    end
-   file:write(self.collectd_config)
+   file:write(collectd_config)
    file:close()
    utils.run_command("chmod 600 " .. new_config_path)
 
@@ -213,12 +213,11 @@ function run(self)
    end
 end
 
-ConfigReplacer.new = function(task_id, collectd_config, options, logger_options)
+ConfigReplacer.new = function(task_id, options, logger_options)
    local replacer = {}
    replacer.options = options
    replacer.logger = utils.get_logger("collectd-config-replacer",
                                       logger_options)
-   replacer.collectd_config = collectd_config
    replacer.prepare = prepare
    replacer.run = run
    replacer.abort = abort
