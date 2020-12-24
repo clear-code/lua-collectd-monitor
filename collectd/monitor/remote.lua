@@ -125,9 +125,9 @@ collectd.register_shutdown(
       monitor_thread_pipe:write("finish\n")
 
       for line in monitor_thread_pipe:lines() do
-         local task_id = line:match("run-config-replacer")
+         local task_id = line:match("run_config_replacer (%d+)")
          if task_id then
-            config_replacer_task_id = 1
+            config_replacer_task_id = tonumber(task_id)
          end
       end
 
