@@ -195,6 +195,7 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function run_command(thread_pipe, command_line, task_id)
+      local utils = require('collectd/monitor/utils')
       local code, command_output = utils.run_command(command_line)
       local result = {
          task_id = tonumber(task_id),
