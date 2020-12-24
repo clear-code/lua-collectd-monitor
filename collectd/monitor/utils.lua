@@ -59,7 +59,10 @@ utils.run_command = function(command_line)
 
    local command_output = ""
    for i = 1, #lines - 1 do
-      command_output = command_output .. "\n" .. lines[i]
+      if i ~= 1 then
+         command_output = command_output .. "\n"
+      end
+      command_output = command_output .. lines[i]
    end
 
    return tonumber(lines[#lines]), command_output

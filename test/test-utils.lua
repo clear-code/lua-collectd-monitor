@@ -53,3 +53,14 @@ function TestUtils:test_broken_config()
    }
    luaunit.assert_equals(actual, expected)
 end
+
+function TestUtils:test_run_command()
+   local code, output = utils.run_command("echo \"hoge\\nhage\"")
+   luaunit.assert_equals(code, 0)
+   luaunit.assert_equals(output, "hoge\nhage")
+end
+
+function TestUtils:test_run_command_with_fail()
+   local code, output = utils.run_command("/bin/false")
+   luaunit.assert_equals(code, 1)
+end
