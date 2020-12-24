@@ -85,6 +85,10 @@ function collectd_stop(self)
    if result ~= 0 then
       return false, err
    end
+   return true
+end
+
+function wait_collectd_stopped(self)
    for i = 1, 10 do
       pid = collectd_pid(self)
       if pid then
@@ -94,14 +98,6 @@ function collectd_stop(self)
       end
    end
    return false, "Cannot detect removing pid file of collectd!"
-end
-
-function ensure_remove_pid_file(self)
-   local pid_path = self:pid_path()
-   if utils.file_exists(pid_path) then
-      remove_file(pid_path)
-   end
-   return not utils.file_exists(pid_path)
 end
 
 function recover_old_config(self)
@@ -155,29 +151,11 @@ function prepare(self, collectd_config)
    return true
 end
 
-function abort(self)
-   local new_config_path = self:new_config_path()
-   -- TODO: Check a running process
-   remove_file(new_config_path)
-end
-
 function run(self)
    -- check the running process
-   local old_pid, err = collectd_pid(self)
-   if old_pid and collectd_is_running(self, old_pid) then
-      self:debug("collectd is running with PID " .. old_pid)
-      local succeeded, err = collectd_stop(self)
-      if not succeeded then
-         self:error("Failed to stop collectd!: " .. err)
-         return false
-      end
-   else
-      self:debug("collectd isn't running.", err)
-   end
-
-
-   if not ensure_remove_pid_file(self) then
-      self:error("Failed to remove pid file of collectd!")
+   local succeeded, err = wait_collectd_stopped(self)
+   if not succeeded then
+      self:error(err)
       return false
    end
 
@@ -188,7 +166,7 @@ function run(self)
       return false
    end
 
-   -- replace with new config
+   -- replace the config with new one
    succeeded, err = rename_file(self:new_config_path(), self:config_path())
    if not succeeded then
       self:error("Failed to replace config file!: " .. err)
@@ -204,6 +182,7 @@ function run(self)
    end
 
    pid = collectd_pid(self)
+   -- TODO: report the result
    if pid then
       self:debug("collectd has been restarted with PID " .. pid)
       return true
@@ -213,12 +192,19 @@ function run(self)
    end
 end
 
+function abort(self)
+   local new_config_path = self:new_config_path()
+   -- TODO: Check a running process
+   remove_file(new_config_path)
+end
+
 ConfigReplacer.new = function(task_id, options, logger_options)
    local replacer = {}
    replacer.options = options
    replacer.logger = utils.get_logger("collectd-config-replacer",
                                       logger_options)
    replacer.prepare = prepare
+   replacer.kill_collectd = collectd_stop
    replacer.run = run
    replacer.abort = abort
    replacer.config_path = function(self)

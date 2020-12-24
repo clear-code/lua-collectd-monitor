@@ -34,4 +34,11 @@ if not replaceable then
    print(err)
    os.exit(1)
 end
-replacer:run()
+
+if replacer:kill_collectd() then
+   replacer:run()
+   os.exit(0)
+else
+   replacer:abort()
+   os.exit(1)
+end

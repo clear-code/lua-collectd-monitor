@@ -5,6 +5,7 @@
 local lunajson = require('lunajson')
 local utils = require('collectd/monitor/utils')
 
+local monitor_config
 local monitor_config_json
 local monitor_thread
 local monitor_thread_pipe
@@ -20,7 +21,8 @@ collectd.register_config(
       local conf = utils.copy_table(default_config)
       utils.merge_table(conf, collectd_conf)
       if conf.MonitorConfigPath then
-         local monitor_config, err_msg = utils.load_config(conf.MonitorConfigPath)
+         local err_msg
+         monitor_config, err_msg = utils.load_config(conf.MonitorConfigPath)
          if err_msg then
             collectd.log_error(err_msg)
          end
@@ -76,11 +78,61 @@ collectd.register_init(
    end
 )
 
+function run_config_replacer(task_id)
+   local unix = require('unix')
+   local pid = unix.fork()
+
+   if pid > 0 then
+      -- parent process
+      return
+   elseif pid < 0 then
+      return
+   end
+
+   -- in child process
+   unix.setsid()
+   pid = unix.fork()
+
+   if pid > 0 then
+      -- parent process
+      os.exit(0)
+   elseif pid < 0 then
+      -- error
+      os.exit(1)
+   end
+
+   -- in grand child process
+   unix.setsid()
+
+   local ConfigReplacer = require('collectd/monitor/config-replacer')
+   local options = monitor_config.Services.collectd
+   local replacer = ConfigReplacer.new(task_id, options)
+   local succeeded = replacer:run()
+
+   os.exit(0)
+end
+
 collectd.register_shutdown(
    function()
       collectd.log_debug("monitor-remote.lua: shutdown")
+
+      local config_replacer_task_id
+
       monitor_thread_pipe:write("finish\n")
+
+      for line in monitor_thread_pipe:lines() do
+         if line == "run-config-replacer" then
+            -- TODO: set proper task ID
+            config_replacer_task_id = 1
+         end
+      end
+
       monitor_thread:join()
+
+      if config_replacer_task_id > 0 then
+         run_config_replacer(config_replacer_task_id)
+      end
+
       return 0
    end
 )

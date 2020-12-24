@@ -132,6 +132,7 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
       local ERROR_NO_COMMAND = 0x1003
       local ERROR_DUPLICATE_TASK_ID = 0x1100
       local ERROR_CANNOT_REPLACE_CONFIG = 0x2000
+      local ERROR_CANNOT_STOP_COLLECTD = 0x2001
 
       if command_threads[task_id] then
          local err_msg = "Received duplicate task_id: " .. tostring(task_id)
@@ -235,12 +236,16 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
          return
       end
 
-      -- TODO: execute replacer:run() in another process
-      replacer:abort()
-
-      message = "Not implemented yet"
-      info(message)
-      send_reply(task_id, ERROR_NOT_IMPLEMENTED, message)
+      -- TODO: Should not stop if detected collectd isn't myself
+      local succeeded, err = replacer:kill_collectd()
+      if succeeded then
+         monitor_thread_pipe:write("run-config-replacer\n")
+      else
+         replacer:abort()
+         message = "Failed to stop collectd!: " .. err
+         error(message)
+         send_reply(task_id, ERROR_CANNOT_STOP_COLLECTD, message)
+      end
    end
 
    function send_reply(task_id, code, msg)
