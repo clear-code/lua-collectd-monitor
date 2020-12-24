@@ -133,7 +133,7 @@ collectd.register_shutdown(
 
       monitor_thread:join()
 
-      if config_replacer_task_id > 0 then
+      if config_replacer_task_id then
          run_config_replacer(config_replacer_task_id)
       end
 
