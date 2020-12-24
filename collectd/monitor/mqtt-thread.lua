@@ -195,8 +195,27 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function run_command(thread_pipe, command_line, task_id)
-      local utils = require('collectd/monitor/utils')
-      local code, command_output = utils.run_command(command_line)
+      function command(command_line)
+         local cmdline = command_line .. "; echo $?"
+         local pipe = io.popen(cmdline)
+
+         local lines = {}
+         for line in pipe:lines() do
+            lines[#lines + 1] = line
+         end
+
+         local command_output = ""
+         for i = 1, #lines - 1 do
+            if i ~= 1 then
+               command_output = command_output .. "\n"
+            end
+            command_output = command_output .. lines[i]
+         end
+
+         return tonumber(lines[#lines]), command_output
+      end
+
+      local code, command_output = command(command_line)
       local result = {
          task_id = tonumber(task_id),
          code = code,
