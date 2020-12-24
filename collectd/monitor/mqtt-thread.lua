@@ -1,4 +1,6 @@
-function mqtt_thread(monitor_thread_pipe, conf, logger)
+function mqtt_thread(monitor_thread_pipe, conf)
+   local utils = require('collectd/monitor/utils')
+   local logger = utils.get_logger("collectd-monitor-remote", conf)
    local ConfigReplacer = require('collectd/monitor/config-replacer')
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
@@ -226,7 +228,12 @@ function mqtt_thread(monitor_thread_pipe, conf, logger)
    end
 
    function dispatch_config(task_id, config)
-      local replacer = ConfigReplacer.new(task_id, conf.Services.collectd)
+      local options = conf.Services.collectd
+      local logger_options = {
+         LogLevel = conf.LogLevel,
+         LogDevice = conf.LogDevice,
+      }
+      local replacer = ConfigReplacer.new(task_id, options, logger_options)
       local replaceable, err = replacer:prepare(config)
       local message
       if not replaceable then

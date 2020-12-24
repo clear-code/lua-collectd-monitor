@@ -58,10 +58,10 @@ local monitor_thread_func = function(pipe, conf_json, load_path)
       package.path = load_path
    end
 
-   local logger = utils.get_logger("collectd-monitor-remote", conf)
-   local ret, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf, logger)
+   local ret, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf)
 
    if err then
+      local logger = utils.get_logger("collectd-monitor-remote", conf)
       logger:error(err)
    end
 end
@@ -106,6 +106,10 @@ function run_config_replacer(task_id)
 
    local ConfigReplacer = require('collectd/monitor/config-replacer')
    local options = monitor_config.Services.collectd
+   local logger_options = {
+      LogLevel = monitor_config.LogLevel,
+      LogDevice = monitor_config.LogDevice,
+   }
    local replacer = ConfigReplacer.new(task_id, options)
    local succeeded = replacer:run()
 
