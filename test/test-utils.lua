@@ -6,20 +6,22 @@ TestUtils = {}
 function TestUtils:test_merge_table()
    local table1 = { key1 = 1 }
    local table2 = { key2 = 2 }
-   luaunit.assert_equals({ key1 = 1, key2 = 2 }, utils.merge_table(table1, table2))
+   luaunit.assert_equals(utils.merge_table(table1, table2),
+                         { key1 = 1, key2 = 2 })
 end
 
 function TestUtils:test_override_table()
    local table1 = { key1 = 1 }
    local table2 = { key1 = 2 }
-   luaunit.assert_equals({ key1 = 2 }, utils.merge_table(table1, table2))
+   luaunit.assert_equals(utils.merge_table(table1, table2),
+                         { key1 = 2 })
 end
 
 function TestUtils:test_copy_table()
    local table = { key1 = 1 }
    local actual = utils.copy_table(table)
    table.key1 = 2
-   luaunit.assert_equals({ key1 = 1 }, actual)
+   luaunit.assert_equals(actual, { key1 = 1 })
 end
 
 function TestUtils:test_load_config()
@@ -35,7 +37,7 @@ function TestUtils:test_load_config()
       conf = conf,
       err_msg = err_msg,
    }
-   luaunit.assert_equals(expected, actual)
+   luaunit.assert_equals(actual, expected)
 end
 
 function TestUtils:test_broken_config()
@@ -49,5 +51,5 @@ function TestUtils:test_broken_config()
       conf = conf,
       err_msg = err_msg,
    }
-   luaunit.assert_equals(expected, actual)
+   luaunit.assert_equals(actual, expected)
 end
