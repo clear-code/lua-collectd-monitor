@@ -18,7 +18,8 @@ dependencies = {
     "cqueues >= 20200726.51",
     "lunajson >= 1.2.3",
     "argparse >= 0.7.1",
-    "luasyslog >= 1.0.0"
+    "luasyslog >= 1.0.0",
+    "lunix >= 20170920",
 }
 build = {
     type = "builtin",
