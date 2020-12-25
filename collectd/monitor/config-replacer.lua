@@ -221,7 +221,7 @@ end
 
 ConfigReplacer.new = function(task_id, options, logger_options)
    local replacer = {}
-   replacer.options = options
+   replacer.options = options or {}
    replacer.logger = utils.get_logger("collectd-config-replacer",
                                       logger_options)
    replacer.prepare = prepare
@@ -229,7 +229,13 @@ ConfigReplacer.new = function(task_id, options, logger_options)
    replacer.run = run
    replacer.abort = abort
    replacer.config_path = function(self)
-      return self.options.ConfigPath
+      if self.options.ConfigPath then
+         return self.options.ConfigPath
+      elseif file_exists("/usr/sbin/collectd") then
+         return "/etc/collectd.conf"
+      elseif file_exists("/opt/collectd/sbin/collectd") then
+         return "/opt/collectd/etc/collectd.conf"
+      end
    end
    replacer.new_config_path = function(self)
       return self:config_path() .. ".lock"
@@ -238,7 +244,13 @@ ConfigReplacer.new = function(task_id, options, logger_options)
       return self:config_path() .. ".orig"
    end
    replacer.pid_path = function(self)
-      return self.options.PIDPath
+      if self.options.PIDPath then
+         return self.options.PIDPath
+      elseif file_exists("/usr/sbin/collectd") then
+         return "/var/run/collectd.pid"
+      elseif file_exists("/opt/collectd/var/run/collectd.pid") then
+         return "/opt/collectd/var/run/collectd.pid"
+      end
    end
    replacer.start_command = function(self)
       if self.options.commands and self.options.commands.start then
