@@ -3,9 +3,9 @@
 local argparse = require('argparse')
 local parser = argparse("replace-config", "Replace the collectd's config and restart the daemon")
 parser:argument("new_config_path", "A path to collectd's config file")
-parser:option("-c --command", "collectd command path", "/usr/sbin/collectd")
-parser:option("-C --config", "collectd config path", "/etc/collectd/collectd.conf")
-parser:option("-P --pid-file", "collectd pid file path", "/run/collectd.pid")
+parser:option("-c --command", "collectd command path", nil)
+parser:option("-C --config", "collectd config path", nil)
+parser:option("-P --pid-file", "collectd pid file path", nil)
 local args = parser:parse()
 
 function new_config(path)
