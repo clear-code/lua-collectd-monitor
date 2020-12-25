@@ -110,7 +110,7 @@ function run_config_replacer(task_id)
       LogLevel = monitor_config.LogLevel,
       LogDevice = monitor_config.LogDevice,
    }
-   local replacer = ConfigReplacer.new(task_id, options)
+   local replacer = ConfigReplacer.new(task_id, options, logger_options)
    local succeeded = replacer:run()
 
    os.exit(0)
