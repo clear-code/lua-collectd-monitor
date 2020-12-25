@@ -215,7 +215,7 @@ function abort(self)
 end
 
 function has_systemd_service(self)
-   local code, err = utils.run_command("systemctl status collectd 2>&1")
+   local code, err = utils.run_command("/bin/systemctl status collectd 2>&1")
    return code == 0
 end
 
@@ -256,7 +256,7 @@ ConfigReplacer.new = function(task_id, options, logger_options)
       if self.options.commands and self.options.commands.start then
          return self.options.commands.start
       elseif has_systemd_service() then
-         return "systemctl start collectd 2>&1"
+         return "/bin/systemctl start collectd 2>&1"
       else
          local command = self.options.CommandPath
          local options = " -P " .. self:pid_path() .. " -C " .. self:config_path()
@@ -267,7 +267,7 @@ ConfigReplacer.new = function(task_id, options, logger_options)
       if self.options.commands and self.options.commands.stop then
          return self.options.commands.stop
       elseif has_systemd_service() then
-         return "systemctl stop collectd 2>&1"
+         return "/bin/systemctl stop collectd 2>&1"
       else
          return "kill " .. collectd_pid(self) .. " 2>&1"
       end
