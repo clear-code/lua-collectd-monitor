@@ -45,7 +45,7 @@ function collectd_is_running(self, pid)
 end
 
 function collectd_dry_run(self)
-   local command = self.options.CommandPath
+   local command = self:command_path()
    local options = " -T -C " .. self:new_config_path()
    local result, err = utils.run_command(command .. options .. " 2>&1")
    if result ~= 0 then
@@ -228,12 +228,21 @@ ConfigReplacer.new = function(task_id, options, logger_options)
    replacer.kill_collectd = collectd_stop
    replacer.run = run
    replacer.abort = abort
+   replacer.command_path = function(self)
+      if self.options.CommandPath then
+         return self.options.CommandPath
+      elseif utils.file_exists("/usr/sbin/collectd") then
+         return "/usr/sbin/collectd"
+      elseif utils.file_exists("/opt/collectd/sbin/collectd") then
+         return "/opt/collectd/sbin/collectd"
+      end
+   end
    replacer.config_path = function(self)
       if self.options.ConfigPath then
          return self.options.ConfigPath
-      elseif file_exists("/usr/sbin/collectd") then
+      elseif utils.file_exists("/usr/sbin/collectd") then
          return "/etc/collectd.conf"
-      elseif file_exists("/opt/collectd/sbin/collectd") then
+      elseif utils.file_exists("/opt/collectd/sbin/collectd") then
          return "/opt/collectd/etc/collectd.conf"
       end
    end
@@ -246,9 +255,9 @@ ConfigReplacer.new = function(task_id, options, logger_options)
    replacer.pid_path = function(self)
       if self.options.PIDPath then
          return self.options.PIDPath
-      elseif file_exists("/usr/sbin/collectd") then
+      elseif utils.file_exists("/usr/sbin/collectd") then
          return "/var/run/collectd.pid"
-      elseif file_exists("/opt/collectd/var/run/collectd.pid") then
+      elseif utils.file_exists("/opt/collectd/sbin/collectd") then
          return "/opt/collectd/var/run/collectd.pid"
       end
    end
@@ -258,7 +267,7 @@ ConfigReplacer.new = function(task_id, options, logger_options)
       elseif has_systemd_service() then
          return "/bin/systemctl start collectd 2>&1"
       else
-         local command = self.options.CommandPath
+         local command = self:command_path()
          local options = " -P " .. self:pid_path() .. " -C " .. self:config_path()
          return command .. options .. " 2>&1"
       end
