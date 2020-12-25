@@ -28,7 +28,7 @@ function rename_file(src, dest)
 end
 
 function remove_file(path)
-   local code, err = utils.run_command("/bin/rm -f \"" .. path .. "\" >2&1")
+   local code, err = utils.run_command("/bin/rm -f \"" .. path .. "\" 2>&1")
    if code ~= 0 then
       return false, err
    end
