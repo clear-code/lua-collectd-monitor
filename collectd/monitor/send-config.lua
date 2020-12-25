@@ -57,6 +57,8 @@ client:on {
          return
       end
 
+      subscribe()
+
       math.randomseed(os.clock())
       local message = {
          task_id = math.random(1, 2^32),
