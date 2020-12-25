@@ -35,7 +35,7 @@ if not replaceable then
    os.exit(1)
 end
 
-if replacer:kill_collectd(true) then
+if replacer:kill_collectd() then
    replacer:run()
    os.exit(0)
 else

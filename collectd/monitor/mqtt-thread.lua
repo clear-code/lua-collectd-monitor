@@ -244,7 +244,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
       end
 
       -- TODO: Should not stop if detected collectd isn't myself
-      local succeeded, err = replacer:kill_collectd()
+      local succeeded, err = replacer:kill_collectd(true)
       if succeeded then
          monitor_thread_pipe:write("run_config_replacer " .. task_id .."\n")
       else
