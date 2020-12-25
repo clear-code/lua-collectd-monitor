@@ -31,5 +31,6 @@ build = {
         ["collectd.monitor.send-command"] = "collectd/monitor/send-command.lua",
         ["collectd.monitor.config-replacer"] = "collectd/monitor/config-replacer.lua",
         ["collectd.monitor.replace-config"] = "collectd/monitor/replace-config.lua",
+        ["collectd.monitor.send-config"] = "collectd/monitor/send-config.lua",
     },
 }

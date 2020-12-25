@@ -92,6 +92,10 @@ client:on {
       io.stderr:write(msg, "\n")
       client:disconnect()
    end,
+
+   close = function(connection)
+      print("MQTT connection closed: ", connection.close_reason)
+   end,
 }
 
 mqtt.run_ioloop(client)
