@@ -45,6 +45,7 @@ if replacer:kill_collectd() then
       os.exit(1)
    end
 else
+   replacer:report()
    replacer:abort()
    os.exit(1)
 end

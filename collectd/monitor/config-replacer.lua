@@ -93,14 +93,20 @@ function collectd_stop(self, kill_own)
 
    if kill_own then
       if not pid then
-         return false, "Cannot get pid from " .. self:pid_path()
+         self.code = ERROR_CANNOT_STOP_COLLECTD
+         self.result.message = "Cannot get pid from " .. self:pid_path()
+         return false, self.result.message
       end
       local current_pid = unix.getpid()
       if not current_pid then
-         return false, "Cannot get current pid!"
+         self.code = ERROR_CANNOT_STOP_COLLECTD
+         self.result.message = "Cannot get current pid!"
+         return false, self.result.message
       end
       if pid ~= current_pid then
-         return false, "PID in " .. self:pid_path() .. " isn't myself!"
+         self.code = ERROR_CANNOT_STOP_COLLECTD
+         self.result.message = "PID in " .. self:pid_path() .. " isn't myself!"
+         return false, self.result.message
       end
    end
 
@@ -110,7 +116,9 @@ function collectd_stop(self, kill_own)
 
    local result, err = utils.run_command(self:stop_command())
    if result ~= 0 then
-      return false, err
+      self.code = ERROR_CANNOT_STOP_COLLECTD
+      self.result.message = err
+      return false, self.result.message
    end
 
    return true
