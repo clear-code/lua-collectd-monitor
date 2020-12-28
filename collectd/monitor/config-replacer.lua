@@ -1,7 +1,18 @@
 local utils = require('collectd/monitor/utils')
 local unix = require('unix')
 
-local ConfigReplacer = {}
+local ConfigReplacer = {
+   SUCCEEDED = 0,
+   ERROR_LOCK_FILE_EXISTS = 0x2000,
+   ERROR_CANNOT_WRITE_NEW_CONFIG = 0x2001,
+   ERROR_BROKEN_CONFIG = 0x2002,
+   ERROR_CANNOT_REMOVE_PID = 0x2003,
+   ERROR_CANNOT_BACKUP_CONFIG = 0x2004,
+   ERROR_CANNOT_REPLACE_CONFIG = 0x2005,
+   ERROR_RECOVERED = 0x2006,
+   ERROR_CANNOT_RECOVER = 0x2007,
+   ERROR_CANNOT_GET_NEW_PID = 0x2008,
+}
 
 function sleep(sec)
    os.execute("sleep " .. tonumber(sec) .. " > /dev/null 2>&1")
@@ -169,23 +180,27 @@ function run(self)
    -- check the running process
    local succeeded, err = wait_collectd_stopped(self)
    if not succeeded then
-      self:error(err)
-      return false
+      self.result.code = ConfigReplacer.ERROR_CANNOT_REMOVE_PID
+      self.result.message = err
+      self:report()
+      return false, self.result.message
    end
 
    -- save old config
    succeeded, err = rename_file(self:config_path(), self:old_config_path())
    if not succeeded then
-      message = "Failed to back up old config file!: " .. err
-      self:error(message)
-      return false, message
+      self.result.code = ConfigReplacer.ERROR_CANNOT_BACKUP_CONFIG
+      self.result.message = "Failed to back up old config file!: " .. err
+      self:report()
+      return false, self.result.message
    end
 
    -- replace the config with new one
    succeeded, err = rename_file(self:new_config_path(), self:config_path())
    if not succeeded then
-      message = "Failed to replace config file!: " .. err
-      self:error(message)
+      self.result.code = ConfigReplacer.ERROR_CANNOT_REPLACE_CONFIG
+      self.result.message = "Failed to replace config file!: " .. err
+      self:report()
       return false, message
    end
 
@@ -195,22 +210,33 @@ function run(self)
       self:error("Failed to start collectd!: " .. err)
       succeeded, message = recover_old_config(self)
       if not succeeded then
+         self.result.code = ConfigReplacer.ERROR_CANNOT_RECOVER
+         self.result.message = message
+         self:report()
          return false, message
       end
       succeeded = false
+      message = err
    end
 
    pid = collectd_pid(self)
    if pid then
       self:debug("collectd has been restarted with PID " .. pid)
       if succeeded then
+         self.result.code = ConfigReplacer.SUCCEEDED
+         self.result.message = "Succeeded to replace config."
+         self:report()
          return true
       else
+         self.result.code = ConfigReplacer.ERROR_RECOVERED
+         self.result.message = message
+         self:report()
          return false, message
       end
    else
-      message = "Failed to get new pid of collectd!"
-      self:error(message)
+      self.result.code = ConfigReplacer.ERROR_CANNOT_GET_NEW_PID
+      self.result.message = "Failed to get new pid of collectd!"
+      self:report()
       return false, message
    end
 end
@@ -226,12 +252,41 @@ function has_systemd_service(self)
    return code == 0
 end
 
+function report(self)
+   local lunajson = require('lunajson')
+   local report = {
+      task_id = self.task_id,
+      code = self.result.code,
+      message = self.result.message,
+   }
+   local report_json = lunajson.encode(report)
+   local report_path = self:report_path()
+
+   if report.code == 0 then
+      self:info(report.message)
+   else
+      self:error(report.message)
+   end
+
+   local file, err = io.open(report_path, "wb")
+   if not file then
+      message = "Failed to write collectd-config-replacer result: " .. err
+      return false, message
+   end
+   file:write(report_json)
+   file:close()
+   utils.run_command("chmod 600 " .. report_path)
+   return true
+end
+
 ConfigReplacer.new = function(task_id, options)
-   local replacer = {}
+   local replacer = {
+      task_id = task_id,
+      options = {},
+      result = {},
+   }
    if options and options.Services and options.Services.collectd then
       replacer.options = options.Services.collectd
-   else
-      replacer.options = {}
    end
    replacer.logger = utils.get_logger("collectd-config-replacer",
                                       options)
@@ -239,6 +294,7 @@ ConfigReplacer.new = function(task_id, options)
    replacer.kill_collectd = collectd_stop
    replacer.run = run
    replacer.abort = abort
+   replacer.report = report
    replacer.command_path = function(self)
       if self.options.CommandPath then
          return self.options.CommandPath
@@ -270,6 +326,15 @@ ConfigReplacer.new = function(task_id, options)
          return "/var/run/collectd.pid"
       elseif utils.file_exists("/opt/collectd/sbin/collectd") then
          return "/opt/collectd/var/run/collectd.pid"
+      end
+   end
+   replacer.report_path = function(self)
+      if self.options.ReplacerReportPath then
+         return self.options.ReplacerReportPath
+      elseif utils.file_exists("/usr/sbin/collectd") then
+         return "/var/log/collectd-config-replacer.log"
+      elseif utils.file_exists("/opt/collectd/sbin/collectd") then
+         return "/opt/collectd/var/log/collectd-config-replacer.log"
       end
    end
    replacer.start_command = function(self)
