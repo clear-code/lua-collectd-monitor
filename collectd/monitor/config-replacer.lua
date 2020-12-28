@@ -226,11 +226,15 @@ function has_systemd_service(self)
    return code == 0
 end
 
-ConfigReplacer.new = function(task_id, options, logger_options)
+ConfigReplacer.new = function(task_id, options)
    local replacer = {}
-   replacer.options = options or {}
+   if options and options.Services and options.Services.collectd then
+      replacer.options = options.Services.collectd
+   else
+      replacer.options = {}
+   end
    replacer.logger = utils.get_logger("collectd-config-replacer",
-                                      logger_options)
+                                      options)
    replacer.prepare = prepare
    replacer.kill_collectd = collectd_stop
    replacer.run = run

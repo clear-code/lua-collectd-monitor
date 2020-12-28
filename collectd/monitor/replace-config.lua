@@ -17,18 +17,19 @@ end
 
 local config = new_config(args.new_config_path)
 local options = {
-   CommandPath = args.command,
-   ConfigPath = args.config,
-   PIDPath = args.pid_file,
-}
-
-local logger_options = {
    LogDevice = "stdout",
    LogLevel = "debug",
+   Services = {
+      collectd = {
+         CommandPath = args.command,
+         ConfigPath = args.config,
+         PIDPath = args.pid_file,
+      },
+   },
 }
 
 local Replacer = require('collectd/monitor/config-replacer')
-local replacer = Replacer.new(0, options, logger_options)
+local replacer = Replacer.new(0, options)
 local replaceable, err = replacer:prepare(config)
 if not replaceable then
    print(err)

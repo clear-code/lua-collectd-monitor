@@ -228,12 +228,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
    end
 
    function dispatch_config(task_id, config)
-      local options = conf.Services.collectd
-      local logger_options = {
-         LogLevel = conf.LogLevel,
-         LogDevice = conf.LogDevice,
-      }
-      local replacer = ConfigReplacer.new(task_id, options, logger_options)
+      local replacer = ConfigReplacer.new(task_id, options)
       local replaceable, err = replacer:prepare(config)
       local message
       if not replaceable then
