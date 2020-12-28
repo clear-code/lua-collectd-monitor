@@ -6,12 +6,13 @@ local ConfigReplacer = {
    ERROR_LOCK_FILE_EXISTS = 0x2000,
    ERROR_CANNOT_WRITE_NEW_CONFIG = 0x2001,
    ERROR_BROKEN_CONFIG = 0x2002,
-   ERROR_CANNOT_REMOVE_PID = 0x2003,
-   ERROR_CANNOT_BACKUP_CONFIG = 0x2004,
-   ERROR_CANNOT_REPLACE_CONFIG = 0x2005,
-   ERROR_RECOVERED = 0x2006,
-   ERROR_CANNOT_RECOVER = 0x2007,
-   ERROR_CANNOT_GET_NEW_PID = 0x2008,
+   ERROR_CANNOT_STOP_COLLECTD = 0x2003,
+   ERROR_CANNOT_REMOVE_PID = 0x2004,
+   ERROR_CANNOT_BACKUP_CONFIG = 0x2005,
+   ERROR_CANNOT_REPLACE_CONFIG = 0x2006,
+   ERROR_RECOVERED = 0x2007,
+   ERROR_CANNOT_RECOVER = 0x2008,
+   ERROR_CANNOT_GET_NEW_PID = 0x2009,
 }
 
 function sleep(sec)
@@ -149,16 +150,17 @@ end
 
 function prepare(self, collectd_config)
    local new_config_path = self:new_config_path()
-   local message
    if utils.file_exists(new_config_path) then
-      message = "Already attempting to replace collectd config!"
-      return false, message
+      self.result.code = CofnigReplacer.ERROR_LOCK_FILE_EXISTS
+      self.result.message = "Already attempting to replace collectd config!"
+      return false, self.result.message
    end
 
    local file, err = io.open(new_config_path, "wb")
    if not file then
-      message = "Failed to write new config: " .. err
-      return false, message
+      self.result.code = ConfigReplacer.ERROR_CANNOT_WRITE_NEW_CONFIG
+      self.result.message = "Failed to write new config: " .. err
+      return false, self.result.message
    end
    file:write(collectd_config)
    file:close()
@@ -166,9 +168,10 @@ function prepare(self, collectd_config)
 
    local succeeded, err = collectd_dry_run(self)
    if not succeeded then
-      message = "New config seems broken!: " .. err
+      self.result.code = ConfigReplacer.ERROR_BROKEN_CONFIG
+      self.result.message = "New config seems broken!: " .. err
       remove_file(new_config_path)
-      return false, message
+      return false, self.result.message
    end
 
    return true
@@ -182,7 +185,6 @@ function run(self)
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_CANNOT_REMOVE_PID
       self.result.message = err
-      self:report()
       return false, self.result.message
    end
 
@@ -191,7 +193,6 @@ function run(self)
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_CANNOT_BACKUP_CONFIG
       self.result.message = "Failed to back up old config file!: " .. err
-      self:report()
       return false, self.result.message
    end
 
@@ -200,8 +201,7 @@ function run(self)
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_CANNOT_REPLACE_CONFIG
       self.result.message = "Failed to replace config file!: " .. err
-      self:report()
-      return false, message
+      return false, self.result.message
    end
 
    -- try to restart
@@ -212,8 +212,7 @@ function run(self)
       if not succeeded then
          self.result.code = ConfigReplacer.ERROR_CANNOT_RECOVER
          self.result.message = message
-         self:report()
-         return false, message
+         return false, self.result.message
       end
       succeeded = false
       message = err
@@ -225,19 +224,16 @@ function run(self)
       if succeeded then
          self.result.code = ConfigReplacer.SUCCEEDED
          self.result.message = "Succeeded to replace config."
-         self:report()
          return true
       else
          self.result.code = ConfigReplacer.ERROR_RECOVERED
          self.result.message = message
-         self:report()
-         return false, message
+         return false, self.result.message
       end
    else
       self.result.code = ConfigReplacer.ERROR_CANNOT_GET_NEW_PID
       self.result.message = "Failed to get new pid of collectd!"
-      self:report()
-      return false, message
+      return false, self.result.message
    end
 end
 

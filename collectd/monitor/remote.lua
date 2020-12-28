@@ -106,7 +106,8 @@ function run_config_replacer(task_id)
 
    local ConfigReplacer = require('collectd/monitor/config-replacer')
    local replacer = ConfigReplacer.new(task_id, options)
-   local succeeded = replacer:run()
+   replacer:run()
+   replacer:report()
 
    os.exit(0)
 end

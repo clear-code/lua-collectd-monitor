@@ -32,13 +32,18 @@ local Replacer = require('collectd/monitor/config-replacer')
 local replacer = Replacer.new(0, options)
 local replaceable, err = replacer:prepare(config)
 if not replaceable then
-   print(err)
+   replacer:report()
    os.exit(1)
 end
 
 if replacer:kill_collectd() then
    replacer:run()
-   os.exit(0)
+   replacer:report()
+   if succeeded then
+      os.exit(0)
+   else
+      os.exit(1)
+   end
 else
    replacer:abort()
    os.exit(1)
