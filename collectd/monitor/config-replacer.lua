@@ -117,27 +117,23 @@ function wait_collectd_stopped(self)
 end
 
 function recover_old_config(self)
+   local message
    self:info("Trying to recover old config ...")
    local succeeded, err = rename_file(self:old_config_path(), self:config_path())
    if not succeeded then
-      self:error("Failed to recover old config file!: " .. err)
-      return false
+      message = "Failed to recover old config file!: " .. err
+      self:error(message)
+      return false, messagea
    end
 
    succeeded, err = collectd_start(self)
    if not succeeded then
-      self:error("Failed to start collectd with old config!: " .. err)
-      return false
+      message = "Failed to start collectd with old config!: " .. err
+      self:error(message)
+      return false, message
    end
 
-   pid = collectd_pid(self)
-   if pid then
-      self:debug("collectd has been restarted with old config. PID: " .. pid)
-      return true
-   else
-      self:error("Failed to recover old confog: Failed to get new pid of collectd!")
-      return false
-   end
+   return true
 end
 
 function prepare(self, collectd_config)
@@ -168,6 +164,8 @@ function prepare(self, collectd_config)
 end
 
 function run(self)
+   local message
+
    -- check the running process
    local succeeded, err = wait_collectd_stopped(self)
    if not succeeded then
@@ -178,33 +176,42 @@ function run(self)
    -- save old config
    succeeded, err = rename_file(self:config_path(), self:old_config_path())
    if not succeeded then
-      self:error("Failed to back up old config file!: " .. err)
-      return false
+      message = "Failed to back up old config file!: " .. err
+      self:error(message)
+      return false, message
    end
 
    -- replace the config with new one
    succeeded, err = rename_file(self:new_config_path(), self:config_path())
    if not succeeded then
-      self:error("Failed to replace config file!: " .. err)
-      return false
+      message = "Failed to replace config file!: " .. err
+      self:error(message)
+      return false, message
    end
 
    -- try to restart
    succeeded, err = collectd_start(self)
    if not succeeded then
       self:error("Failed to start collectd!: " .. err)
-      recover_old_config(self)
-      return false
+      succeeded, message = recover_old_config(self)
+      if not succeeded then
+         return false, message
+      end
+      succeeded = false
    end
 
    pid = collectd_pid(self)
-   -- TODO: report the result
    if pid then
       self:debug("collectd has been restarted with PID " .. pid)
-      return true
+      if succeeded then
+         return true
+      else
+         return false, message
+      end
    else
-      self:error("Failed to get new pid of collectd!")
-      return false
+      message = "Failed to get new pid of collectd!"
+      self:error(message)
+      return false, message
    end
 end
 
