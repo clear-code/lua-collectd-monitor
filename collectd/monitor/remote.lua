@@ -105,7 +105,7 @@ function run_config_replacer(task_id)
    unix.setsid()
 
    local ConfigReplacer = require('collectd/monitor/config-replacer')
-   local replacer = ConfigReplacer.new(task_id, options)
+   local replacer = ConfigReplacer.new(task_id, monitor_config)
    replacer:run()
    replacer:report()
 

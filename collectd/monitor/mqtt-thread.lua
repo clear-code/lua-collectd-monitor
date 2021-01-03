@@ -226,7 +226,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
    end
 
    function dispatch_config(task_id, config)
-      local replacer = ConfigReplacer.new(task_id, options)
+      local replacer = ConfigReplacer.new(task_id, conf)
       local replaceable = replacer:prepare(config)
       local message
       if not replaceable then
