@@ -46,7 +46,7 @@ $ sudo luarocks make
   </Module>
 </Plugin>
 ```
-* Copy conf/monitor-config.json to /opt/collectd/etc/ and edit it to set connection settings to MQTT broker and define available recovery commands
+* Copy [conf/monitor-config.json](conf/monitor-config.json) to /opt/collectd/etc/ and edit it to set connection settings to MQTT broker and define available recovery commands
 
 ## Remote command feature
 

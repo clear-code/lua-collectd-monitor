@@ -46,7 +46,7 @@ $ sudo luarocks make
   </Module>
 </Plugin>
 ```
-* conf/monitor-config.jsonを/opt/collectd/etc/にコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
+* [conf/monitor-config.json](conf/monitor-config.json)を/opt/collectd/etc/にコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
 
 ## リモートコマンド機能
 
