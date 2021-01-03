@@ -230,7 +230,13 @@ function mqtt_thread(monitor_thread_pipe, conf)
       local replaceable = replacer:prepare(config)
       local message
       if not replaceable then
-         error(replacer.result.message)
+         if logger.level ~= "DEBUG" and replacer.result.code == ConfigReplacer.ERROR_BROKEN_CONFIG then
+            -- Shouln't show detailed message because received collectd.conf may incldue
+            -- secret information.
+            error("Cannot launch collectd with new config with task_id:" .. task_id)
+         else
+            error(replacer.result.message)
+         end
          send_reply(task_id, replacer.result.code, replacer.result.message)
          return
       end

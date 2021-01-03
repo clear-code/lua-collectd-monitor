@@ -64,3 +64,11 @@ function TestUtils:test_run_command_with_fail()
    local code, output = utils.run_command("/bin/false")
    luaunit.assert_equals(code, 1)
 end
+
+function TestUtils:test_logger()
+   local options = {
+      LogLevel = "debug",
+   }
+   local logger = utils.get_logger("test-logger", options)
+   luaunit.assert_equals(logger.level, "DEBUG")
+end
