@@ -2,9 +2,13 @@ local luaunit = require("luaunit")
 local Replacer = require("collectd/monitor/config-replacer")
 
 local options = {
-   CommandPath = "collectd",
-   ConfigPath = "collectd.conf",
-   PIDPath = "collectd.pid",
+   Services = {
+      collectd = {
+         CommandPath = "collectd",
+         ConfigPath = "collectd.conf",
+         PIDPath = "collectd.pid",
+      },
+   },
 }
 
 TestReplacer = {}
@@ -41,11 +45,15 @@ end
 
 function TestReplacer:test_start_command()
    local options = {
-      CommandPath = "collectd",
-      ConfigPath = "collectd.conf",
-      PIDPath = "collectd.pid",
-      commands = {
-         start = "start",
+      Services = {
+         collectd = {
+            CommandPath = "collectd",
+            ConfigPath = "collectd.conf",
+            PIDPath = "collectd.pid",
+            commands = {
+               start = "start",
+            },
+         },
       },
    }
    local replacer = Replacer.new(0, options)
@@ -55,11 +63,15 @@ end
 
 function TestReplacer:test_stop_command()
    local options = {
-      CommandPath = "collectd",
-      ConfigPath = "collectd.conf",
-      PIDPath = "collectd.pid",
-      commands = {
-         start = "stop",
+      Services = {
+         collectd = {
+            CommandPath = "collectd",
+            ConfigPath = "collectd.conf",
+            PIDPath = "collectd.pid",
+            commands = {
+               start = "stop",
+            },
+         },
       },
    }
    local replacer = Replacer.new(0, options)
