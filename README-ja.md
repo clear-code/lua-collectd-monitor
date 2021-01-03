@@ -39,14 +39,14 @@ $ sudo luarocks make
   Globals true
 </LoadPlugin>
 <Plugin lua>
-  BasePath "/usr/local/share/lua/5.1/collectd/monitor"
-  Script "remote.lua"
-  <Module "remote">
-    MonitorConfigPath "/opt/collectd/etc/monitor-config.json"
+  BasePath "/usr/local/share/lua/5.1"
+  Script "collectd/monitor/remote.lua"
+  <Module "collectd/monitor/remote">
+    MonitorConfigPath "/etc/collectd-monitor-config.json"
   </Module>
 </Plugin>
 ```
-* [conf/monitor-config.json](conf/monitor-config.json)を/opt/collectd/etc/にコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
+* [conf/monitor-config.json](conf/monitor-config.json)を/etc/collectd-monitor-config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
 
 ## リモートコマンド機能
 
