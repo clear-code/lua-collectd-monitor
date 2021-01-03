@@ -17,6 +17,9 @@ parser:option("-r --result-topic", "Topic to receive command result")
 
 local args = parser:parse()
 
+local published = false
+local received = false
+
 local file, err = io.open(args.config_path, "rb")
 if err then
    print(err)
@@ -59,6 +62,10 @@ client:on {
 
       subscribe()
 
+      if published then
+         return
+      end
+
       math.randomseed(os.clock())
       local message = {
          task_id = math.random(1, 2^32),
@@ -81,10 +88,12 @@ client:on {
          end,
       }
       client:publish(publish_options)
+      published = true
    end,
 
    message = function(packet)
       print("Received a result: " .. inspect(packet))
+      received = true
       client:disconnect()
    end,
 
@@ -99,3 +108,7 @@ client:on {
 }
 
 mqtt.run_ioloop(client)
+while args.result_topic and not received do
+   -- connection may closed by broker when collectd is restarted
+   mqtt.run_ioloop(client)
+end

@@ -272,6 +272,32 @@ function mqtt_thread(monitor_thread_pipe, conf)
       end
    end
 
+   function try_sending_config_replacer_result()
+      local replacer = ConfigReplacer.new(0, conf)
+      local path = replacer:report_path()
+      local file, err_msg, err, errnum = io.open(path, "rb")
+      if not file then
+         return
+      end
+      local result_json = file:read("*all")
+      file:close()
+
+      function is_valid_config_replacer_result(result)
+         return result and result.task_id and result.code and result.message
+      end
+
+      local succeeded, result = pcall(lunajson.decode, result_json)
+      if succeeded and is_valid_config_replacer_result(result) then
+         send_reply(result.task_id, result.code, result.message)
+      else
+         error("Invalid log for replacing collectd.conf: ", result_json)
+      end
+
+      os.remove(path)
+
+      return true
+   end
+
    function handle_command_task(task_id, ctx)
       local line, why = ctx.pipe:recv("*L", "t")
       if line ~= nil then
@@ -303,8 +329,28 @@ function mqtt_thread(monitor_thread_pipe, conf)
    local loop = mqtt.get_ioloop(autocreate, loop_options)
    loop:add(client)
 
+   local config_replacer_result_checker = {
+      first_check_time = os.time(),
+      last_check_time = 0,
+      done = false,
+      check = function(self)
+         if self.done then
+            return
+         end
+
+         local curr_time = os.time()
+         local elapsed_time = curr_time - self.first_check_time
+         if curr_time ~= self.last_check_time and elapsed_time <= 120 then
+            self.done = try_sending_config_replacer_result()
+         end
+         self.last_check_time = curr_time
+      end,
+   }
+
    while true do
       loop:iteration()
+
+      config_replacer_result_checker:check()
 
       for task_id, ctx in pairs(command_threads) do
          handle_command_task(task_id, ctx)
