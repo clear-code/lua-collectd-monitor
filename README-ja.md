@@ -33,7 +33,7 @@
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* collectd.confに以下のような設定を追加する（より詳細な設定項目についてはconf/collectd-lua-debug.confを参照）:
+* collectd.confに以下のような設定を追加する（より詳細な設定項目については[conf/collectd-remote-monitoring-example.conf](conf/collectd-remote-monitoring-example.conf)を参照）:
 ```xml
 <LoadPlugin lua>
   Globals true
