@@ -90,6 +90,7 @@ client:on {
    message = function(packet)
       print("Received a result: " .. inspect(packet))
       received = true
+      assert(client:acknowledge(packet))
       assert(client:disconnect())
    end,
 
