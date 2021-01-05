@@ -1,7 +1,3 @@
---
--- Register collectd callback functions
---
-
 local lunajson = require('lunajson')
 local utils = require('collectd/monitor/utils')
 
