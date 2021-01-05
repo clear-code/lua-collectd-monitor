@@ -45,11 +45,7 @@ function subscribe()
       topic = args.result_topic,
       qos = tonumber(args.qos),
    }
-
-   local packet_id, err = client:subscribe(subscribe_options)
-   if not packet_id then
-      print("Failed to subscribe: " .. err)
-   end
+   assert(client:subscribe(subscribe_options))
 end
 
 client:on {
@@ -83,23 +79,23 @@ client:on {
          callback = function(packet)
             print(inspect(packet))
             if not args.result_topic then
-               client:disconnect()
+               assert(client:disconnect())
             end
          end,
       }
-      client:publish(publish_options)
+      assert(client:publish(publish_options))
       published = true
    end,
 
    message = function(packet)
       print("Received a result: " .. inspect(packet))
       received = true
-      client:disconnect()
+      assert(client:disconnect())
    end,
 
    error = function(msg)
       io.stderr:write(msg, "\n")
-      client:disconnect()
+      assert(client:disconnect())
    end,
 
    close = function(connection)
