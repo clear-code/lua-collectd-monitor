@@ -33,7 +33,7 @@ Following 2 plugins are included:
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* Add settings like the following example to your collectd.conf (see [conf/collectd-remote-monitoring-example.conf](conf/collectd-remote-monitoring-example.conf) for more details)
+* Add settings like the following example to your collectd.conf (see [conf/collectd-monitor-remote-example.conf](conf/collectd-monitor-remote-example.conf) for more details)
 ```xml
 <LoadPlugin lua>
   Globals true
