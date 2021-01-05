@@ -1,6 +1,6 @@
-function mqtt_thread(monitor_thread_pipe, conf)
+function mqtt_thread(monitor_thread_pipe, monitor_config)
    local utils = require('collectd/monitor/utils')
-   local logger = utils.get_logger("collectd-monitor-remote", conf)
+   local logger = utils.get_logger("collectd-monitor-remote", monitor_config)
    local ConfigReplacer = require('collectd/monitor/config-replacer')
    local errno = require('cqueues.errno')
    local lunajson = require('lunajson')
@@ -33,12 +33,12 @@ function mqtt_thread(monitor_thread_pipe, conf)
 
    local mqtt = require('mqtt')
    local client = mqtt.client {
-      uri = conf.Host,
-      username = conf.User,
-      password = conf.Password,
-      secure = conf.Secure,
-      clean = conf.CleanSession,
-      reconnect = conf.ReconnectInterval,
+      uri = monitor_config.Host,
+      username = monitor_config.User,
+      password = monitor_config.Password,
+      secure = monitor_config.Secure,
+      clean = monitor_config.CleanSession,
+      reconnect = monitor_config.ReconnectInterval,
    }
    client:on {
       connect = function(reply)
@@ -49,13 +49,13 @@ function mqtt_thread(monitor_thread_pipe, conf)
          end
 
          local subscribe_options = {
-            topic = conf.CommandTopic,
-            qos = conf.QoS,
+            topic = monitor_config.CommandTopic,
+            qos = monitor_config.QoS,
          }
 
          local packet_id, err = client:subscribe(subscribe_options)
          if packet_id then
-            debug("Subscribed to ", conf.CommandTopic, ", packet_id: ", packet_id)
+            debug("Subscribed to ", monitor_config.CommandTopic, ", packet_id: ", packet_id)
          else
             error("Failed to subscribe: ", err)
          end
@@ -141,7 +141,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
          return
       end
 
-      local file, err_msg, err, errnum = io.open(conf.MonitorConfigPath, "rb")
+      local file, err_msg, err, errnum = io.open(monitor_config.MonitorConfigPath, "rb")
       if not file then
          error(err_msg)
          send_reply(task_id, ERROR_NO_CONFIG, err_msg)
@@ -226,7 +226,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
    end
 
    function dispatch_config(task_id, config)
-      local replacer = ConfigReplacer.new(task_id, conf)
+      local replacer = ConfigReplacer.new(task_id, monitor_config)
       local replaceable = replacer:prepare(config)
       local message
       if not replaceable then
@@ -252,7 +252,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
    end
 
    function send_reply(task_id, code, msg)
-      if not conf.CommandResultTopic then
+      if not monitor_config.CommandResultTopic then
          return
       end
 
@@ -268,9 +268,9 @@ function mqtt_thread(monitor_thread_pipe, conf)
 
       local succeeded_or_packet_id, msg = client:publish(
          {
-            topic = conf.CommandResultTopic,
+            topic = monitor_config.CommandResultTopic,
             payload = result_json,
-            qos = conf.QoS,
+            qos = monitor_config.QoS,
          }
       )
       if not succeeded_or_packet_id then
@@ -279,7 +279,7 @@ function mqtt_thread(monitor_thread_pipe, conf)
    end
 
    function try_sending_config_replacer_result()
-      local replacer = ConfigReplacer.new(0, conf)
+      local replacer = ConfigReplacer.new(0, monitor_config)
       local path = replacer:report_path()
       local file, err_msg, err, errnum = io.open(path, "rb")
       if not file then
