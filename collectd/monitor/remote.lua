@@ -65,7 +65,6 @@ end
 collectd.register_init(
    function()
       collectd.log_debug("monitor-remote.lua: init")
-      local conf = monitor_config
       monitor_thread, monitor_thread_pipe =
          require('cqueues.thread').start(monitor_thread_func,
                                          monitor_config_json,
