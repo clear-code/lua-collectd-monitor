@@ -2,7 +2,7 @@ local utils = require('collectd/monitor/utils')
 local inspect = require('inspect')
 local monitor_config
 local default_config = {}
-local read_callbacks = {}
+local write_callbacks = {}
 local notification_callbacks = {}
 
 function config(collectd_conf)
@@ -49,13 +49,13 @@ function load_local_monitoring_config(path)
       return false
    end
 
-   local succeeded, read_cb, notification_cb = pcall(func)
+   local succeeded, write_cb, notification_cb = pcall(func)
    if not succeeded then
       collectd.log_error("Failed to load " .. path)
       return false
    end
 
-   register_callbacks(read_callbacks, read_cb)
+   register_callbacks(write_callbacks, write_cb)
    register_callbacks(notification_callbacks, notification_cb)
 
    return true
