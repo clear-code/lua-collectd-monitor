@@ -93,11 +93,57 @@ function shutdown()
    return 0
 end
 
+function dispatch_callback(callback, data)
+   local succeeded, task = pcall(callback, data)
+   if not succeeded then
+      -- TODO: Show the contents of the function
+      collectd.log_error("Failed to evaluate a local monitoring config!")
+      return
+   end
+
+   if not task then
+      return
+   end
+
+   function is_valid_task(task)
+      if type(task) ~= "table" then
+         return false
+      end
+      if type(task.service) ~= "string" then
+         return false
+      end
+      if type(task.command) ~= "string" then
+         return false
+      end
+      return true
+   end
+
+   if not is_valid_task(task) then
+      collectd.log_error("Invalid task: ", inspect(task))
+   end
+
+   local code, message = utils.run_command(task.command)
+
+   if code == 0 then
+      collectd.log_info("Succeeded to run a recovery command: " .. task.command)
+   else
+      collectd.log_error("Failed to run a recovery command: " .. task.command .. ", message: ", message)
+   end
+
+   -- TODO: Emit a notification
+end
+
 function write(metrics)
+   for i = 1, #write_callbacks do
+      dispatch_callback(write_callbacks[i], metrics)
+   end
    return 0
 end
 
 function notification(notification)
+   for i = 1, #notification_callbacks do
+      dispatch_callback(notification_callbacks[i], notification)
+   end
    return 0
 end
 
