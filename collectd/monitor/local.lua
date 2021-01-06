@@ -30,7 +30,7 @@ function register_callbacks(callbacks, cb)
          callbacks[#callbacks + 1] = cb[i]
       end
    else
-      collectd.log_error("Invalid type for callback: " .. type(cb))
+      collectd.log_error("Invalid type for local monitoring callback: " .. type(cb))
    end
 end
 
