@@ -120,6 +120,27 @@ function get_callback_name(callback)
    return name
 end
 
+function get_service_config(task)
+   if not monitor_config.Services then
+      return nil
+   end
+   if not monitor_config.Services[task.service] then
+      return nil
+   end
+   return monitor_config.Services[task.service]
+end
+
+function get_command(task)
+   local config = get_service_config(task)
+   if not config then
+      return nil
+   end
+   if not config.commands then
+      return nil
+   end
+   return config.commands[task.command]
+end
+
 function dispatch_callback(callback, data)
    local cb_name = get_callback_name(callback)
 
@@ -134,7 +155,7 @@ function dispatch_callback(callback, data)
       return
    end
 
-   function is_valid_task(task)
+   local is_valid_task = function(task)
       if type(task) ~= "table" then
          return false
       end
@@ -151,12 +172,24 @@ function dispatch_callback(callback, data)
       collectd.log_error("Invalid task: ", inspect(task))
    end
 
-   local code, message = utils.run_command(task.command)
+   local command = get_command(task)
+
+   if not command then
+      local err = cb_name
+      err = err .. ": Cannot find service:" .. task.service
+      err = err .. ", command: " .. task.command
+      collectd.log_error(err)
+      return
+   end
+
+   local code, message = utils.run_command(command)
 
    if code == 0 then
       collectd.log_info("Succeeded to run a recovery command of " .. cb_name)
    else
-      collectd.log_error("Failed to run a recovery command of " .. cb_name .. "\nmessage:\n", message)
+      local err = "Failed to run a recovery command of "
+      err = err .. cb_name .. "\nmessage: " .. message
+      collectd.log_error(err)
    end
 
    -- TODO: Emit a notification
