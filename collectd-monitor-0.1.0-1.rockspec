@@ -20,6 +20,7 @@ dependencies = {
     "argparse >= 0.7.1",
     "luasyslog >= 1.0.0",
     "lunix >= 20170920",
+    "penlight >= 1.8.0",
 }
 build = {
     type = "builtin",
