@@ -22,12 +22,20 @@ function config(collectd_conf)
    return 0
 end
 
-function register_callbacks(callbacks, cb)
+function register_callbacks(filename, callbacks, cb)
    if type(cb) == "function" then
-      callbacks[#callbacks + 1] = cb
+      callbacks[#callbacks + 1] = {
+         filename = filename,
+         name = nil,
+         func = cb
+      }
    elseif type(cb) == "table" then
-      for i = 0, #cb do
-         callbacks[#callbacks + 1] = cb[i]
+      for key, func in pairs(cb) do
+         callbacks[#callbacks + 1] = {
+            filename = filename,
+            name = key,
+            func = func,
+         }
       end
    else
       collectd.log_error("Invalid type for local monitoring callback: " .. type(cb))
@@ -55,8 +63,8 @@ function load_local_monitoring_config(path)
       return false
    end
 
-   register_callbacks(write_callbacks, write_cb)
-   register_callbacks(notification_callbacks, notification_cb)
+   register_callbacks(path, write_callbacks, write_cb)
+   register_callbacks(path, notification_callbacks, notification_cb)
 
    return true
 end
@@ -93,11 +101,21 @@ function shutdown()
    return 0
 end
 
+function get_callback_name(callback)
+   local name = callback.filename
+   if callback.name then
+      name = name .. "::" .. callback.name
+   end
+   return name
+end
+
 function dispatch_callback(callback, data)
-   local succeeded, task = pcall(callback, data)
+   local cb_name = get_callback_name(callback)
+
+   local succeeded, task = pcall(callback.func, data)
    if not succeeded then
-      -- TODO: Show the contents of the function
-      collectd.log_error("Failed to evaluate a local monitoring config!")
+      local message = "Failed to evaluate a local monitoring config!: " .. cb_name
+      collectd.log_error(message)
       return
    end
 
@@ -125,9 +143,9 @@ function dispatch_callback(callback, data)
    local code, message = utils.run_command(task.command)
 
    if code == 0 then
-      collectd.log_info("Succeeded to run a recovery command: " .. task.command)
+      collectd.log_info("Succeeded to run a recovery command of " .. cb_name)
    else
-      collectd.log_error("Failed to run a recovery command: " .. task.command .. ", message: ", message)
+      collectd.log_error("Failed to run a recovery command of " .. cb_name .. "\nmessage:\n", message)
    end
 
    -- TODO: Emit a notification
