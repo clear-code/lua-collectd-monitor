@@ -4,18 +4,18 @@ local monitor_config
 local default_config = {}
 
 function config(collectd_conf)
-   local conf = utils.copy_table(default_config)
-   utils.merge_table(conf, collectd_conf)
-   if conf.MonitorConfigPath then
-      local err_msg
-      monitor_config, err_msg = utils.load_config(conf.MonitorConfigPath)
+   monitor_config = utils.copy_table(default_config)
+   utils.merge_table(monitor_config, collectd_conf)
+   local config_path = monitor_config.MonitorConfigPath
+   if config_path then
+      local conf, err_msg = utils.load_config(config_path)
       if err_msg then
          collectd.log_error(err_msg)
       end
-      utils.merge_table(conf, monitor_config)
+      utils.merge_table(monitor_config, conf)
    end
 
-   collectd.log_debug("config: " .. inspect(conf))
+   collectd.log_debug("config: " .. inspect(monitor_config))
 end
 
 function init()

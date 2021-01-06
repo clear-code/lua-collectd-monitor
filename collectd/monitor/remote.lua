@@ -14,23 +14,23 @@ collectd.register_config(
    function(collectd_conf)
       collectd.log_debug("monitor-remote.lua: config")
 
-      local conf = utils.copy_table(default_config)
-      utils.merge_table(conf, collectd_conf)
-      if conf.MonitorConfigPath then
-         local err_msg
-         monitor_config, err_msg = utils.load_config(conf.MonitorConfigPath)
+      monitor_config = utils.copy_table(default_config)
+      utils.merge_table(monitor_config, collectd_conf)
+      local config_path = monitor_config.MonitorConfigPath
+      if config_path then
+         local conf, err_msg = utils.load_config(config_path)
          if err_msg then
             collectd.log_error(err_msg)
          end
-         utils.merge_table(conf, monitor_config)
+         utils.merge_table(monitor_config, conf)
       end
 
-      monitor_config_json = lunajson.encode(conf)
+      monitor_config_json = lunajson.encode(monitor_config)
 
       local debug_config_json = monitor_config_json
-      if conf.Password then
-         conf.Password = "********"
-         debug_config_json = lunajson.encode(conf)
+      if monitor_config.Password then
+         monitor_config.Password = "********"
+         debug_config_json = lunajson.encode(monitor_config)
       end
       collectd.log_debug("config: " .. debug_config_json)
 
