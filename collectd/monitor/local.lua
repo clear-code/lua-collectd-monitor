@@ -141,6 +141,19 @@ function get_command(task)
    return config.commands[task.command]
 end
 
+function is_valid_task(task)
+   if type(task) ~= "table" then
+      return false
+   end
+   if type(task.service) ~= "string" then
+      return false
+   end
+   if type(task.command) ~= "string" then
+      return false
+   end
+   return true
+end
+
 function dispatch_callback(callback, data)
    local cb_name = get_callback_name(callback)
 
@@ -153,19 +166,6 @@ function dispatch_callback(callback, data)
 
    if not task then
       return
-   end
-
-   local is_valid_task = function(task)
-      if type(task) ~= "table" then
-         return false
-      end
-      if type(task.service) ~= "string" then
-         return false
-      end
-      if type(task.command) ~= "string" then
-         return false
-      end
-      return true
    end
 
    if not is_valid_task(task) then
