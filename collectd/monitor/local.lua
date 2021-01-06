@@ -16,6 +16,8 @@ function config(collectd_conf)
    end
 
    collectd.log_debug("config: " .. inspect(monitor_config))
+
+   return 0
 end
 
 function init()
