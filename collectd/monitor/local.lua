@@ -5,6 +5,9 @@ local default_config = {}
 local write_callbacks = {}
 local notification_callbacks = {}
 
+local CALLBACK_TYPE_WRITE = "write"
+local CALLBACK_TYPE_NOTIFICATION = "notification"
+
 function config(collectd_conf)
    monitor_config = utils.copy_table(default_config)
    utils.merge_table(monitor_config, collectd_conf)
@@ -23,9 +26,15 @@ function config(collectd_conf)
 end
 
 function register_callbacks(filename, callbacks, cb)
+   local callback_type = CALLBACK_TYPE_WRITE
+   if callbacks == notification_callbacks then
+      callback_type = CALLBACK_TYPE_NOTIFICATION
+   end
+
    if type(cb) == "function" then
       callbacks[#callbacks + 1] = {
          filename = filename,
+         type = callback_type,
          name = nil,
          func = cb
       }
@@ -33,6 +42,7 @@ function register_callbacks(filename, callbacks, cb)
       for key, func in pairs(cb) do
          callbacks[#callbacks + 1] = {
             filename = filename,
+            type = callback_type,
             name = key,
             func = func,
          }
@@ -103,6 +113,7 @@ end
 
 function get_callback_name(callback)
    local name = callback.filename
+   name = name .. "::" .. callback.type
    if callback.name then
       name = name .. "::" .. callback.name
    end
