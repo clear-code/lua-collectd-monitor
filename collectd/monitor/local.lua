@@ -26,16 +26,16 @@ function shutdown()
    return 0
 end
 
-function read()
+function write(metrics)
    return 0
 end
 
-function write(metrics)
+function notification(notification)
    return 0
 end
 
 collectd.register_config(config)
 collectd.register_init(init)
 collectd.register_shutdown(shutdown)
-collectd.register_read(read)
 collectd.register_write(write)
+collectd.register_notification(notification)
