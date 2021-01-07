@@ -35,7 +35,7 @@ function config(collectd_conf)
 end
 
 function init()
-   log_debug("collectd.monitor.local: init")
+   log_debug("init")
 
    math.randomseed(os.time())
 
@@ -65,10 +65,12 @@ function init()
 end
 
 function shutdown()
+   log_debug("shutdown")
    return 0
 end
 
 function write(metrics)
+   log_debug("write")
    for i = 1, #write_callbacks do
       dispatch_callback(write_callbacks[i], metrics)
    end
@@ -76,6 +78,7 @@ function write(metrics)
 end
 
 function notification(notification)
+   log_debug("notification")
    for i = 1, #notification_callbacks do
       if notification.plugin ~= PLUGIN_NAME then
          dispatch_callback(notification_callbacks[i], notification)
