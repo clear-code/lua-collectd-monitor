@@ -32,7 +32,7 @@ Following 2 plugins are included:
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* Add settings like the following example to your collectd.conf:
+* Add settings like the following example to your collectd.conf (see [conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example) for more options of remote monitoring feature):
 ```xml
 <LoadPlugin lua>
   Globals true
@@ -55,9 +55,8 @@ $ sudo luarocks make
   </Module>
 </Plugin>
 ```
-  * See [conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example) for more options of remote monitoring feature.
 * Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker (if you use remote monitoring feature) and define available recovery commands.
-* If you use local monitoring feature, put additional config files written in Lua to /etc/collectd/monitor/local/. The extension of these config files should be ".lua". See [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) for examples.
+* If you use local monitoring feature, put additional config files written in Lua to /etc/collectd/monitor/local/ with the extension ".lua". See [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) for examples.
 
 ## Remote command feature
 
