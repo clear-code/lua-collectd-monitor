@@ -6,8 +6,11 @@ local default_config = {}
 local write_callbacks = {}
 local notification_callbacks = {}
 
-local CALLBACK_TYPE_WRITE = "write"
-local CALLBACK_TYPE_NOTIFICATION = "notification"
+NOTIF_FAILURE = 1
+NOTIF_WARNING = 2
+NOTIF_OKAY = 4
+CALLBACK_TYPE_WRITE = "write"
+CALLBACK_TYPE_NOTIFICATION = "notification"
 
 
 function config(collectd_conf)

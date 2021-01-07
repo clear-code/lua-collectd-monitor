@@ -16,10 +16,6 @@ local write_callbacks = {
    end,
 }
 
-local NOTIF_FAILURE = 1
-local NOTIF_WARNING = 2
-local NOTIF_OKAY = 4
-
 local notification_callbacks = {
    fail_example = function(notification)
       if notification.severity == NOTIF_FAILURE then
