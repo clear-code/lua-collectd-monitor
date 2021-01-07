@@ -14,7 +14,7 @@ LoadPlugin logfile
 <Plugin lua>
     BasePath "/opt/collectd/share/collectd/lua"
     Script "collectd/monitor/remote.lua"
-    <Module "collectd/monitor/remote">
+    <Module "collectd/monitor/remote.lua">
         MonitorConfigPath "/opt/collectd/etc/monitor/config.json"
         LogLevel "debug" # fatal, err, warn, info, debug
         LogDevice "stdout" # syslog or stdout

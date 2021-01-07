@@ -7,11 +7,11 @@
 <Plugin lua>
     BasePath "/usr/local/share/lua/5.1"
     Script "collectd/monitor/remote.lua"
-    <Module "collectd/monitor/remote">
+    <Module "collectd/monitor/remote.lua">
         MonitorConfigPath "/etc/collectd/monitor/config.json"
 
-        # Following options can be placed in this file or monitor-config.json.
-	# If same options exist in both files, later one is applied.
+        # Following options can be placed in above config.json too.
+        # If there are same options in both files, config.json's one is applied.
         #Host "localhost:1883" # localhost:8883 for TLS
         #User "test-user"
         #Password "test-user"

@@ -10,6 +10,7 @@
 * collectd/monitor/local.lua
   * ローカルのcollectdで収集したメトリクスデータを用いて復旧条件を判定し、リカバリコマンドを実行するプラグインです。復旧条件はLuaのコードで記述します。
 
+
 ## 必要なもの
 
 * Lua or LuaJIT
@@ -24,6 +25,7 @@
   * 少なくとも以下の2つのトピックにアクセス可能である必要があります。
     * 別ホスト側からコマンドを送信するためのトピック
     * 別ホスト側にコマンド実行結果を送信するためのトピック
+
 
 ## インストール
 
@@ -43,7 +45,7 @@ $ sudo luarocks make
 
   # リモート監視機能を使用する場合
   Script "collectd/monitor/remote.lua"
-  <Module "collectd/monitor/remote">
+  <Module "collectd/monitor/remote.lua">
     MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
 
@@ -57,6 +59,7 @@ $ sudo luarocks make
 ```
 * [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報（リモート監視機能を使用する場合）と必要なリカバリコマンドを設定する
 * ローカル監視機能を使用する場合は、Luaで書かれた設定ファイルを任意のファイル名 + 拡張子「.lua」で/etc/collectd/monitor/local/以下に配置する。設定例については[conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua)を参照。
+
 
 ## リモートコマンド機能
 

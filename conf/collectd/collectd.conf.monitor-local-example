@@ -15,6 +15,9 @@ LoadPlugin memory
     Script "collectd/monitor/local.lua"
     <Module "collectd/monitor/local.lua">
         MonitorConfigPath "/etc/collectd/monitor/config.json"
-        LocalMonitorConfigDir "/etc/collectd/monitor/local/"
+
+        # This option can be placed in above config.json too.
+        # If there is same option in both files, config.json's one is applied.
+	LocalMonitorConfigDir "/etc/collectd/monitor/local/"
     </Module>
 </Plugin>

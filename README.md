@@ -10,6 +10,7 @@ Following 2 plugins are included:
 * collectd/monitor/local.lua
   * Detects system faults according to metrics data collected by local collectd daemon and executes recovery commands. Trigger conditions are written in Lua code.
 
+
 ## Prerequisites
 
 * Lua or LuaJIT
@@ -24,6 +25,7 @@ Following 2 plugins are included:
   * At least 2 topics should be accessible
     * For sending commands from a server
     * For replying command results from collectd
+
 
 ## Install
 
@@ -43,7 +45,7 @@ $ sudo luarocks make
 
   # Use remote monitoring feature.
   Script "collectd/monitor/remote.lua"
-  <Module "collectd/monitor/remote">
+  <Module "collectd/monitor/remote.lua">
     MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
 
@@ -57,6 +59,7 @@ $ sudo luarocks make
 ```
 * Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker (if you use remote monitoring feature) and define available recovery commands.
 * If you use local monitoring feature, put additional config files written in Lua to /etc/collectd/monitor/local/ with the extension ".lua". See [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) for examples.
+
 
 ## Remote command feature
 
