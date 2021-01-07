@@ -24,18 +24,18 @@ function config(collectd_conf)
    if config_path then
       local conf, err_msg = utils.load_config(config_path)
       if err_msg then
-         collectd.log_error(err_msg)
+         log_error(err_msg)
       end
       utils.merge_table(monitor_config, conf)
    end
 
-   collectd.log_debug("config: " .. inspect(monitor_config))
+   log_debug("config: " .. inspect(monitor_config))
 
    return 0
 end
 
 function init()
-   collectd.log_debug("collectd.monitor.local: init")
+   log_debug("collectd.monitor.local: init")
 
    math.randomseed(os.time())
 
@@ -48,7 +48,7 @@ function init()
    local succeeded, ret = pcall(pl_dir.getfiles, config_dir, "*.lua")
    if not succeeded then
       local err = ret
-      collectd.log_error(err)
+      log_error(err)
       return 0
    end
 
@@ -90,19 +90,19 @@ function load_local_monitoring_config(path)
 
    local content = pl_file.read(path)
    if not content then
-      collectd.log_error("Failed to load " .. path)
+      log_error("Failed to load " .. path)
       return false
    end
 
    local func, err = load(content)
    if not func then
-      collectd.log_error("Failed to load " .. path .. ": " .. err)
+      log_error("Failed to load " .. path .. ": " .. err)
       return false
    end
 
    local succeeded, write_cb, notification_cb = pcall(func)
    if not succeeded then
-      collectd.log_error("Failed to load " .. path)
+      log_error("Failed to load " .. path)
       return false
    end
 
@@ -135,7 +135,7 @@ function register_callbacks(filename, callbacks, cb)
          }
       end
    else
-      collectd.log_error("Invalid type for local monitoring callback: " .. type(cb))
+      log_error("Invalid type for local monitoring callback: " .. type(cb))
    end
 end
 
@@ -145,7 +145,7 @@ function dispatch_callback(callback, data)
    local succeeded, task = pcall(callback.func, data)
    if not succeeded then
       local message = "Failed to evaluate a local monitoring config!: " .. cb_name
-      collectd.log_error(message)
+      log_error(message)
       return
    end
 
@@ -154,7 +154,7 @@ function dispatch_callback(callback, data)
    end
 
    if not is_valid_task(task) then
-      collectd.log_error("Invalid task: ", inspect(task))
+      log_error("Invalid task: ", inspect(task))
    end
 
    local command = get_command(task)
@@ -163,18 +163,18 @@ function dispatch_callback(callback, data)
       local err = cb_name
       err = err .. ": Cannot find service:" .. task.service
       err = err .. ", command: " .. task.command
-      collectd.log_error(err)
+      log_error(err)
       return
    end
 
    local code, message = utils.run_command(command)
 
    if code == 0 then
-      collectd.log_info("Succeeded to run a recovery command of " .. cb_name)
+      log_info("Succeeded to run a recovery command of " .. cb_name)
    else
       local err = "Failed to run a recovery command of "
       err = err .. cb_name .. "\nmessage: " .. message
-      collectd.log_error(err)
+      log_error(err)
    end
 
    emit_notification(callback, task, code, message)
@@ -254,6 +254,22 @@ function is_valid_task(task)
       return false
    end
    return true
+end
+
+function log_error(msg)
+   collectd.log_error(PLUGIN_NAME .. ": " .. msg)
+end
+
+function log_warn(msg)
+   collectd.log_warning(PLUGIN_NAME .. ": " .. msg)
+end
+
+function log_info(msg)
+   collectd.log_info(PLUGIN_NAME .. ": " .. msg)
+end
+
+function log_debug(msg)
+   collectd.log_debug(PLUGIN_NAME .. ": " .. msg)
 end
 
 
