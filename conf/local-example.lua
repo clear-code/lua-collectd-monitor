@@ -1,5 +1,5 @@
 local write_callbacks = {
-   free_is_under_10GB = function(metrics)
+   memory_free_is_under_10GB = function(metrics)
       if metrics.plugin == "memory" and metrics.type_instance == "free" then
          if metrics.values[1] <= 10 * 1000 * 1000 * 1000 then
             return { service = "hello", command = "exec" }
@@ -7,7 +7,7 @@ local write_callbacks = {
       end
    end,
 
-   free_is_over_10GB = function(metrics)
+   memory_free_is_over_10GB = function(metrics)
       if metrics.plugin == "memory" and metrics.type_instance == "free" then
          if metrics.values[1] > 10 * 1000 * 1000 * 1000 then
             return { service = "hello", command = "exec" }
