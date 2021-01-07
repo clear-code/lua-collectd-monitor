@@ -254,9 +254,9 @@ collectd.conf送信および実行結果のメッセージ形式はJSONです。
 ### ローカル監視機能のテスト手順
 
 * collecd.confとして[conf/collectd/collectd.conf.monitor-local-example](conf/collectd/collectd.conf.monitor-local-example)を使用する
-* [conf/collectd/monitor/config.json]を/etc/collectd/monitor/config.jsonにコピーする
+* [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーする
   * 上記ファイルに定義された復旧コマンドを確認し、必要に応じて編集する。
-* [conf/collectd/monitor/local/example.lua]を/etc/collectd/monitor/local/にコピーする
+* [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua)を/etc/collectd/monitor/local/にコピーする
   * 上記ファイルのコマンド実行条件を確認し、必要に応じて編集する。
 * collectdデーモンを起動する
 * syslogを確認し、以下のようなNotificationが発行されていることを確認する

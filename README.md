@@ -254,9 +254,9 @@ Here is the defined result codes:
 ### Steps to test local monitoring feature
 
 * Use [conf/collectd/collectd.conf.monitor-local-example](conf/collectd/collectd.conf.monitor-local-example) as your collectd.conf
-* Copy [conf/collectd/monitor/config.json] to /etc/collectd/monitor/config.json
+* Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json
   * Check the file to confirm pre-defined recovery commands and edit it if needed
-* Copy [conf/collectd/monitor/local/example.lua] to /etc/collectd/monitor/local/
+* Copy [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) to /etc/collectd/monitor/local/
   * Check the file to confirm recovery conditions and edit it if needed
 * Start collectd daemon
 * See your syslog to confirm that a collectd's notification is emitted like this:
