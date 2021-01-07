@@ -1,0 +1,14 @@
+LoadPlugin memory
+
+<LoadPlugin lua>
+    Globals true
+</LoadPlugin>
+
+<Plugin lua>
+    BasePath "/usr/local/share/lua/5.1"
+    Script "collectd/monitor/local.lua"
+    <Module "collectd/monitor/local.lua">
+        MonitorConfigPath "/etc/collectd/monitor/config.json"
+        LocalMonitorConfigDir "/etc/collectd/monitor/local/"
+    </Module>
+</Plugin>
