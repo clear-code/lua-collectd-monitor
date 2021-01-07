@@ -33,7 +33,7 @@
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* collectd.confに以下のような設定を追加する（より詳細な設定項目については[conf/collectd-monitor-remote-example.conf](conf/collectd-monitor-remote-example.conf)を参照）:
+* collectd.confに以下のような設定を追加する（より詳細な設定項目については[conf/collectd/collectd.conf-monitor-remote-example](conf/collectd/collectd.conf-monitor-remote-example)を参照）:
 ```xml
 <LoadPlugin lua>
   Globals true
@@ -42,11 +42,11 @@ $ sudo luarocks make
   BasePath "/usr/local/share/lua/5.1"
   Script "collectd/monitor/remote.lua"
   <Module "collectd/monitor/remote">
-    MonitorConfigPath "/etc/collectd-monitor-config.json"
+    MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
 </Plugin>
 ```
-* [conf/monitor-config.json](conf/monitor-config.json)を/etc/collectd-monitor-config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
+* [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
 
 ## リモートコマンド機能
 
@@ -111,8 +111,8 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 |------------|--------|------|
 | task_id    | 数値   | コマンド送信者によって割り振られる一意のタスクID |
 | timestamp  | 文字列 | コマンドのタイムスタンプ（ISO8601形式UTC）|
-| service    | 文字列 | monitor-config.jsonで定義されているサービス名 |
-| command    | 文字列 | monitor-config.jsonで定義されているコマンド名 |
+| service    | 文字列 | `MonitorConfigPath`で指定した設定ファイルで定義されているサービス名 |
+| command    | 文字列 | `MonitorConfigPath`で指定した設定ファイルで定義されているコマンド名 |
 
 #### コマンド結果メッセージ
 
