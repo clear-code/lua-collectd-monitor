@@ -5,7 +5,7 @@ local unix = require('unix')
 
 local monitor_config
 local default_config = {}
-local write_callbacks = {}
+local metric_callbacks = {}
 local notification_callbacks = {}
 
 local PLUGIN_NAME = "lua-collectd-monitor-local"
@@ -13,7 +13,7 @@ local PLUGIN_NAME = "lua-collectd-monitor-local"
 NOTIF_FAILURE = 1
 NOTIF_WARNING = 2
 NOTIF_OKAY = 4
-CALLBACK_TYPE_WRITE = "write"
+CALLBACK_TYPE_METRIC = "metric"
 CALLBACK_TYPE_NOTIFICATION = "notification"
 
 
@@ -71,8 +71,8 @@ end
 
 function write(metrics)
    log_debug("write")
-   for i = 1, #write_callbacks do
-      dispatch_callback(write_callbacks[i], metrics)
+   for i = 1, #metric_callbacks do
+      dispatch_callback(metric_callbacks[i], metrics)
    end
    return 0
 end
@@ -103,20 +103,20 @@ function load_local_monitoring_config(path)
       return false
    end
 
-   local succeeded, write_cb, notification_cb = pcall(func)
+   local succeeded, metric_cb, notification_cb = pcall(func)
    if not succeeded then
       log_error("Failed to load " .. path)
       return false
    end
 
-   register_callbacks(path, write_callbacks, write_cb)
+   register_callbacks(path, metric_callbacks, metric_cb)
    register_callbacks(path, notification_callbacks, notification_cb)
 
    return true
 end
 
 function register_callbacks(filename, callbacks, cb)
-   local callback_type = CALLBACK_TYPE_WRITE
+   local callback_type = CALLBACK_TYPE_METRIC
    if callbacks == notification_callbacks then
       callback_type = CALLBACK_TYPE_NOTIFICATION
    end
