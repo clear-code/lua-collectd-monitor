@@ -247,3 +247,19 @@ collectd.conf送信および実行結果のメッセージ形式はJSONです。
 | 8199 (0x2007) | 再起動に失敗したため古いcollectd.confでリカバリされた |
 | 8200 (0x2008) | 再起動に失敗し古いcollectd.confでのリカバリにも失敗した |
 | 8201 (0x2009) | 新しいプロセスIDの取得に失敗した |
+
+
+## ローカル監視機能
+
+### ローカル監視機能のテスト手順
+
+* collecd.confとして[conf/collectd/collectd.conf.monitor-local-example](conf/collectd/collectd.conf.monitor-local-example)を使用する
+* [conf/collectd/monitor/config.json]を/etc/collectd/monitor/config.jsonにコピーする
+  * 上記ファイルに定義された復旧コマンドを確認し、必要に応じて編集する。
+* [conf/collectd/monitor/local/example.lua]を/etc/collectd/monitor/local/にコピーする
+  * 上記ファイルのコマンド実行条件を確認し、必要に応じて編集する。
+* collectdデーモンを起動する
+* syslogを確認し、以下のようなNotificationが発行されていることを確認する
+```
+Notification: severity = OKAY, host = local, plugin = lua-collectd-monitor-local, plugin_instance = 0, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, type_instance = 0, message = {"message":"Hello World!","task_id":244078840,"code":0}
+```

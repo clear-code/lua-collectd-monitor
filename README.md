@@ -247,3 +247,19 @@ Here is the defined result codes:
 | 8199 (0x2007) | Recovered by the old collectd.conf due to failing restart |
 | 8200 (0x2008) | Failed to restart and failed to recover by the old collect.conf |
 | 8201 (0x2009) | Cannot get new pid |
+
+
+## Local monitoring feature
+
+### Steps to test local monitoring feature
+
+* Use [conf/collectd/collectd.conf.monitor-local-example](conf/collectd/collectd.conf.monitor-local-example) as your collectd.conf
+* Copy [conf/collectd/monitor/config.json] to /etc/collectd/monitor/config.json
+  * Check the file to confirm pre-defined recovery commands and edit it if needed
+* Copy [conf/collectd/monitor/local/example.lua] to /etc/collectd/monitor/local/
+  * Check the file to confirm recovery conditions and edit it if needed
+* Start collectd daemon
+* See your syslog to confirm that a collectd's notification is emitted like this:
+```
+Notification: severity = OKAY, host = localhost, plugin = lua-collectd-monitor-local, plugin_instance = 0, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, type_instance = 0, message = {"message":"Hello World!","task_id":244078840,"code":0}
+```
