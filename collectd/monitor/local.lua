@@ -5,16 +5,16 @@ local unix = require('unix')
 
 local monitor_config
 local default_config = {}
-local metric_callbacks = {}
-local notification_callbacks = {}
+local metric_handlers = {}
+local notification_handlers = {}
 
 local PLUGIN_NAME = "lua-collectd-monitor-local"
 
 NOTIF_FAILURE = 1
 NOTIF_WARNING = 2
 NOTIF_OKAY = 4
-CALLBACK_TYPE_METRIC = "metric"
-CALLBACK_TYPE_NOTIFICATION = "notification"
+HANDLER_TYPE_METRIC = "metric"
+HANDLER_TYPE_NOTIFICATION = "notification"
 
 
 function config(collectd_conf)
@@ -71,17 +71,17 @@ end
 
 function write(metrics)
    log_debug("write")
-   for i = 1, #metric_callbacks do
-      dispatch_callback(metric_callbacks[i], metrics)
+   for i = 1, #metric_handlers do
+      dispatch_handler(metric_handlers[i], metrics)
    end
    return 0
 end
 
 function notification(notification)
    log_debug("notification")
-   for i = 1, #notification_callbacks do
+   for i = 1, #notification_handlers do
       if notification.plugin ~= PLUGIN_NAME then
-         dispatch_callback(notification_callbacks[i], notification)
+         dispatch_handler(notification_handlers[i], notification)
       end
    end
    return 0
@@ -109,43 +109,43 @@ function load_local_monitoring_config(path)
       return false
    end
 
-   register_callbacks(path, metric_callbacks, metric_cb)
-   register_callbacks(path, notification_callbacks, notification_cb)
+   register_handlers(path, metric_handlers, metric_cb)
+   register_handlers(path, notification_handlers, notification_cb)
 
    return true
 end
 
-function register_callbacks(filename, callbacks, cb)
-   local callback_type = CALLBACK_TYPE_METRIC
-   if callbacks == notification_callbacks then
-      callback_type = CALLBACK_TYPE_NOTIFICATION
+function register_handlers(filename, handlers, cb)
+   local handler_type = HANDLER_TYPE_METRIC
+   if handlers == notification_handlers then
+      handler_type = HANDLER_TYPE_NOTIFICATION
    end
 
    if type(cb) == "function" then
-      callbacks[#callbacks + 1] = {
+      handlers[#handlers + 1] = {
          filename = filename,
-         type = callback_type,
+         type = handler_type,
          name = nil,
          func = cb
       }
    elseif type(cb) == "table" then
       for key, func in pairs(cb) do
-         callbacks[#callbacks + 1] = {
+         handlers[#handlers + 1] = {
             filename = filename,
-            type = callback_type,
+            type = handler_type,
             name = key,
             func = func,
          }
       end
    else
-      log_error("Invalid type for local monitoring callback: " .. type(cb))
+      log_error("Invalid type for local monitoring handler: " .. type(cb))
    end
 end
 
-function dispatch_callback(callback, data)
-   local cb_name = get_callback_name(callback)
+function dispatch_handler(handler, data)
+   local cb_name = get_handler_name(handler)
 
-   local succeeded, task = pcall(callback.func, data)
+   local succeeded, task = pcall(handler.func, data)
    if not succeeded then
       local message = "Failed to evaluate a local monitoring config!: " .. cb_name
       log_error(message)
@@ -180,11 +180,11 @@ function dispatch_callback(callback, data)
       log_error(err)
    end
 
-   emit_notification(callback, task, code, message)
+   emit_notification(handler, task, code, message)
 end
 
-function emit_notification(callback, task, code, message)
-   local cb_name = get_callback_name(callback)
+function emit_notification(handler, task, code, message)
+   local cb_name = get_handler_name(handler)
 
    local severity = NOTIF_OKAY
    if code ~= 0 then
@@ -216,11 +216,11 @@ function emit_notification(callback, task, code, message)
    dispatch_notification(notification)
 end
 
-function get_callback_name(callback)
-   local name = callback.filename
-   name = name .. "::" .. callback.type
-   if callback.name then
-      name = name .. "::" .. callback.name
+function get_handler_name(handler)
+   local name = handler.filename
+   name = name .. "::" .. handler.type
+   if handler.name then
+      name = name .. "::" .. handler.name
    end
    return name
 end
