@@ -1,5 +1,6 @@
 local utils = require('collectd/monitor/utils')
 local inspect = require('inspect')
+
 local monitor_config
 local default_config = {}
 local write_callbacks = {}
@@ -7,6 +8,7 @@ local notification_callbacks = {}
 
 local CALLBACK_TYPE_WRITE = "write"
 local CALLBACK_TYPE_NOTIFICATION = "notification"
+
 
 function config(collectd_conf)
    monitor_config = utils.copy_table(default_config)
@@ -23,60 +25,6 @@ function config(collectd_conf)
    collectd.log_debug("config: " .. inspect(monitor_config))
 
    return 0
-end
-
-function register_callbacks(filename, callbacks, cb)
-   local callback_type = CALLBACK_TYPE_WRITE
-   if callbacks == notification_callbacks then
-      callback_type = CALLBACK_TYPE_NOTIFICATION
-   end
-
-   if type(cb) == "function" then
-      callbacks[#callbacks + 1] = {
-         filename = filename,
-         type = callback_type,
-         name = nil,
-         func = cb
-      }
-   elseif type(cb) == "table" then
-      for key, func in pairs(cb) do
-         callbacks[#callbacks + 1] = {
-            filename = filename,
-            type = callback_type,
-            name = key,
-            func = func,
-         }
-      end
-   else
-      collectd.log_error("Invalid type for local monitoring callback: " .. type(cb))
-   end
-end
-
-function load_local_monitoring_config(path)
-   local pl_file = require('pl.file')
-
-   local content = pl_file.read(path)
-   if not content then
-      collectd.log_error("Failed to load " .. path)
-      return false
-   end
-
-   local func, err = load(content)
-   if not func then
-      collectd.log_error("Failed to load " .. path .. ": " .. err)
-      return false
-   end
-
-   local succeeded, write_cb, notification_cb = pcall(func)
-   if not succeeded then
-      collectd.log_error("Failed to load " .. path)
-      return false
-   end
-
-   register_callbacks(path, write_callbacks, write_cb)
-   register_callbacks(path, notification_callbacks, notification_cb)
-
-   return true
 end
 
 function init()
@@ -109,6 +57,116 @@ end
 
 function shutdown()
    return 0
+end
+
+function write(metrics)
+   for i = 1, #write_callbacks do
+      dispatch_callback(write_callbacks[i], metrics)
+   end
+   return 0
+end
+
+function notification(notification)
+   for i = 1, #notification_callbacks do
+      dispatch_callback(notification_callbacks[i], notification)
+   end
+   return 0
+end
+
+
+function load_local_monitoring_config(path)
+   local pl_file = require('pl.file')
+
+   local content = pl_file.read(path)
+   if not content then
+      collectd.log_error("Failed to load " .. path)
+      return false
+   end
+
+   local func, err = load(content)
+   if not func then
+      collectd.log_error("Failed to load " .. path .. ": " .. err)
+      return false
+   end
+
+   local succeeded, write_cb, notification_cb = pcall(func)
+   if not succeeded then
+      collectd.log_error("Failed to load " .. path)
+      return false
+   end
+
+   register_callbacks(path, write_callbacks, write_cb)
+   register_callbacks(path, notification_callbacks, notification_cb)
+
+   return true
+end
+
+function register_callbacks(filename, callbacks, cb)
+   local callback_type = CALLBACK_TYPE_WRITE
+   if callbacks == notification_callbacks then
+      callback_type = CALLBACK_TYPE_NOTIFICATION
+   end
+
+   if type(cb) == "function" then
+      callbacks[#callbacks + 1] = {
+         filename = filename,
+         type = callback_type,
+         name = nil,
+         func = cb
+      }
+   elseif type(cb) == "table" then
+      for key, func in pairs(cb) do
+         callbacks[#callbacks + 1] = {
+            filename = filename,
+            type = callback_type,
+            name = key,
+            func = func,
+         }
+      end
+   else
+      collectd.log_error("Invalid type for local monitoring callback: " .. type(cb))
+   end
+end
+
+function dispatch_callback(callback, data)
+   local cb_name = get_callback_name(callback)
+
+   local succeeded, task = pcall(callback.func, data)
+   if not succeeded then
+      local message = "Failed to evaluate a local monitoring config!: " .. cb_name
+      collectd.log_error(message)
+      return
+   end
+
+   if not task then
+      return
+   end
+
+   if not is_valid_task(task) then
+      collectd.log_error("Invalid task: ", inspect(task))
+   end
+
+   local command = get_command(task)
+
+   if not command then
+      local err = cb_name
+      err = err .. ": Cannot find service:" .. task.service
+      err = err .. ", command: " .. task.command
+      collectd.log_error(err)
+      return
+   end
+
+   local code, message = utils.run_command(command)
+
+   if code == 0 then
+      collectd.log_info("Succeeded to run a recovery command of " .. cb_name)
+   else
+      local err = "Failed to run a recovery command of "
+      err = err .. cb_name .. "\nmessage: " .. message
+      collectd.log_error(err)
+   end
+
+   -- TODO: Emit a notification
 end
 
 function get_callback_name(callback)
@@ -154,60 +212,6 @@ function is_valid_task(task)
    return true
 end
 
-function dispatch_callback(callback, data)
-   local cb_name = get_callback_name(callback)
-
-   local succeeded, task = pcall(callback.func, data)
-   if not succeeded then
-      local message = "Failed to evaluate a local monitoring config!: " .. cb_name
-      collectd.log_error(message)
-      return
-   end
-
-   if not task then
-      return
-   end
-
-   if not is_valid_task(task) then
-      collectd.log_error("Invalid task: ", inspect(task))
-   end
-
-   local command = get_command(task)
-
-   if not command then
-      local err = cb_name
-      err = err .. ": Cannot find service:" .. task.service
-      err = err .. ", command: " .. task.command
-      collectd.log_error(err)
-      return
-   end
-
-   local code, message = utils.run_command(command)
-
-   if code == 0 then
-      collectd.log_info("Succeeded to run a recovery command of " .. cb_name)
-   else
-      local err = "Failed to run a recovery command of "
-      err = err .. cb_name .. "\nmessage: " .. message
-      collectd.log_error(err)
-   end
-
-   -- TODO: Emit a notification
-end
-
-function write(metrics)
-   for i = 1, #write_callbacks do
-      dispatch_callback(write_callbacks[i], metrics)
-   end
-   return 0
-end
-
-function notification(notification)
-   for i = 1, #notification_callbacks do
-      dispatch_callback(notification_callbacks[i], notification)
-   end
-   return 0
-end
 
 collectd.register_config(config)
 collectd.register_init(init)
