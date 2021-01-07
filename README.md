@@ -8,7 +8,7 @@ Following 2 plugins are included:
   * This plugin itself doesn't have the feature to detect system faults.
   * It aims to detect system faults by another host which receives metrics data via collectd's network plugin, and send recovery commands from the host to this plugin.
 * collectd/monitor/local.lua
-  * Detects system faults according to metrics data collected by local collectd daemon and executes recovery commands.
+  * Detects system faults according to metrics data collected by local collectd daemon and executes recovery commands. Trigger conditions are written in Lua code.
 
 ## Prerequisites
 
@@ -32,20 +32,32 @@ Following 2 plugins are included:
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* Add settings like the following example to your collectd.conf (see [conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example) for more details)
+* Add settings like the following example to your collectd.conf:
 ```xml
 <LoadPlugin lua>
   Globals true
 </LoadPlugin>
+
 <Plugin lua>
   BasePath "/usr/local/share/lua/5.1"
+
+  # Use remote monitoring feature.
   Script "collectd/monitor/remote.lua"
   <Module "collectd/monitor/remote">
     MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
+
+  # Use local monitoring feature.
+  Script "collectd/monitor/local.lua"
+  <Module "collectd/monitor/local">
+    MonitorConfigPath "/etc/collectd/monitor/config.json"
+    LocalMonitorConfigDir "/etc/collectd/monitor/local/"
+  </Module>
 </Plugin>
 ```
-* Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker and define available recovery commands
+  * See [conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example) for more options of remote monitoring feature.
+* Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker (if you use remote monitoring feature) and define available recovery commands.
+* If you use local monitoring feature, put additional config files written in Lua to /etc/collectd/monitor/local/. The extension of these config files should be ".lua". See [conf/collectd/monitor/local/](conf/collectd/monitor/local/) for examples.
 
 ## Remote command feature
 

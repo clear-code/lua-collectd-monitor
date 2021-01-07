@@ -1,14 +1,14 @@
 # lua-collectd-monitor
 
 障害復旧機能を提供するcollectdプラグインです。Luaで実装されています。
-以下の2つのプラグインを提供します。
+以下の2つのプラグインが含まれています。
 
 * collectd/monitor/remote.lua
   * 予め定義したリカバリコマンドをリモートホストからMQTT経由で受け取って実行するプラグインです。また、MQTTで新しいcollectd.confを受け取りcollectdに適用する機能も持ちます。
   * このプラグイン自体は障害を検知する機能を持ちません。
   * collectdで収集した監視データをnetworkプラグインで別ホストに転送し、同ホスト側の別ソフトウェアで障害を検知の上、復旧コマンドを本プラグインに送信する使い方を想定しています。
 * collectd/monitor/local.lua
-  * ローカルのcollectdで収集したメトリクスデータを用いて復旧条件を判定し、リカバリコマンドを実行するプラグインです。
+  * ローカルのcollectdで収集したメトリクスデータを用いて復旧条件を判定し、リカバリコマンドを実行するプラグインです。復旧条件はLuaのコードで記述します。
 
 ## 必要なもの
 
@@ -32,20 +32,32 @@
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* collectd.confに以下のような設定を追加する（より詳細な設定項目については[conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example)を参照）:
+* collectd.confに以下のような設定を追加する:
 ```xml
 <LoadPlugin lua>
   Globals true
 </LoadPlugin>
+
 <Plugin lua>
   BasePath "/usr/local/share/lua/5.1"
+
+  # リモート監視機能を使用する場合
   Script "collectd/monitor/remote.lua"
   <Module "collectd/monitor/remote">
     MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
+
+  # ローカル監視機能を使用する場合
+  Script "collectd/monitor/local.lua"
+  <Module "collectd/monitor/local">
+    MonitorConfigPath "/etc/collectd/monitor/config.json"
+    LocalMonitorConfigDir "/etc/collectd/monitor/local/"
+  </Module>
 </Plugin>
 ```
-* [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報と必要なリカバリコマンドを設定する
+  * リモート監視機能のより詳細な設定項目については[conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example)を参照
+* [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報（リモート監視機能を使用する場合）と必要なリカバリコマンドを設定する
+* ローカル監視機能を使用する場合は、Luaで書かれた設定ファイルを任意の名前で/etc/collectd/monitor/local/以下に配置する。ファイル名の拡張子は.luaとする。設定例については[conf/collectd/monitor/local/](conf/collectd/monitor/local/)以下を参照。
 
 ## リモートコマンド機能
 
