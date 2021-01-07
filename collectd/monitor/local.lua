@@ -1,10 +1,14 @@
 local utils = require('collectd/monitor/utils')
 local inspect = require('inspect')
+local lunajson = require('lunajson')
+local unix = require('unix')
 
 local monitor_config
 local default_config = {}
 local write_callbacks = {}
 local notification_callbacks = {}
+
+local PLUGIN_NAME = "lua-collectd-monitor-local"
 
 NOTIF_FAILURE = 1
 NOTIF_WARNING = 2
@@ -32,6 +36,8 @@ end
 
 function init()
    collectd.log_debug("collectd.monitor.local: init")
+
+   math.randomseed(os.time())
 
    local pl_dir = require('pl.dir')
    local config_dir = monitor_config.LocalMonitorConfigDir
@@ -71,7 +77,9 @@ end
 
 function notification(notification)
    for i = 1, #notification_callbacks do
-      dispatch_callback(notification_callbacks[i], notification)
+      if notification.plugin ~= PLUGIN_NAME then
+         dispatch_callback(notification_callbacks[i], notification)
+      end
    end
    return 0
 end
@@ -169,7 +177,40 @@ function dispatch_callback(callback, data)
       collectd.log_error(err)
    end
 
-   -- TODO: Emit a notification
+   emit_notification(callback, task, code, message)
+end
+
+function emit_notification(callback, task, code, message)
+   local cb_name = get_callback_name(callback)
+
+   local severity = NOTIF_OKAY
+   if code ~= 0 then
+      severity = NOTIF_FAILURE
+   end
+
+   local result = {
+      task_id = math.random(1, 2^32),
+      code = code,
+      message = message,
+   }
+   local result_json = lunajson.encode(result)
+   if #result_json > 127 then
+      result.message = "Omitted since it exceeds max length of collectd notification message!"
+      result_json = lunajson.encode(result)
+   end
+
+   local notification = {
+      host = unix.gethostname(),
+      message = result_json,
+      plugin = PLUGIN_NAME,
+      plugin_instance = "0",
+      severity = severity,
+      time = os.time(),
+      type = cb_name,
+      type_instance = "0",
+      meta = {},
+   }
+   dispatch_notification(notification)
 end
 
 function get_callback_name(callback)
