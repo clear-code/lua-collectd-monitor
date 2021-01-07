@@ -33,7 +33,7 @@ Following 2 plugins are included:
 $ git clone https://github.com/clear-code/lua-collectd-monitor
 $ sudo luarocks make
 ```
-* Add settings like the following example to your collectd.conf (see [conf/collectd-monitor-remote-example.conf](conf/collectd-monitor-remote-example.conf) for more details)
+* Add settings like the following example to your collectd.conf (see [conf/collectd/collectd.conf-monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example) for more details)
 ```xml
 <LoadPlugin lua>
   Globals true
@@ -42,11 +42,11 @@ $ sudo luarocks make
   BasePath "/usr/local/share/lua/5.1"
   Script "collectd/monitor/remote.lua"
   <Module "collectd/monitor/remote">
-    MonitorConfigPath "/etc/collectd-monitor-config.json"
+    MonitorConfigPath "/etc/collectd/monitor/config.json"
   </Module>
 </Plugin>
 ```
-* Copy [conf/monitor-config.json](conf/monitor-config.json) to /etc/collectd-monitor-config.json and edit it to set connection settings to MQTT broker and define available recovery commands
+* Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker and define available recovery commands
 
 ## Remote command feature
 
@@ -111,8 +111,8 @@ Members:
 |------------|--------|---------|
 | task_id    | number | An unique task ID assigned by a command sender |
 | timestamp  | string | Timestamp of a command (ISO8601 UTC) |
-| service    | string | A service name defined in monitor-config.json |
-| command    | string | A command name defined in monitor-config.json |
+| service    | string | A service name defined in the config file specified by `MonitorConfigPath` |
+| command    | string | A command name defined in the config file specified by `MonitorConfigPath` |
 
 #### Command result message:
 

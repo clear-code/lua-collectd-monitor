@@ -1,5 +1,5 @@
 LoadPlugin logfile
-#LoadPlugin cpu
+LoadPlugin memory
 <LoadPlugin lua>
     Globals true
 </LoadPlugin>
@@ -15,7 +15,7 @@ LoadPlugin logfile
     BasePath "/opt/collectd/share/collectd/lua"
     Script "collectd/monitor/local.lua"
     <Module "collectd/monitor/local.lua">
-        MonitorConfigPath "/opt/collectd/etc/collectd-monitor/config.json"
-        LocalMonitorConfigDir "/opt/collectd/etc/collectd-monitor/local/"
+        MonitorConfigPath "/opt/collectd/etc/monitor/config.json"
+        LocalMonitorConfigDir "/opt/collectd/etc/monitor/local/"
     </Module>
 </Plugin>
