@@ -195,7 +195,7 @@ function emit_notification(callback, task, code, message)
    }
    local result_json = lunajson.encode(result)
    if #result_json > 127 then
-      result.message = "Omitted since it exceeds max length of collectd notification message!"
+      result.message = "Omitted due to exceeding max message length!"
       result_json = lunajson.encode(result)
    end
 
