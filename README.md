@@ -8,8 +8,7 @@ Following 2 plugins are included:
   * This plugin itself doesn't have the feature to detect system faults.
   * It aims to detect system faults by another host which receives metrics data via collectd's network plugin, and send recovery commands from the host to this plugin.
 * collectd/monitor/local.lua
-  * Not implemented yet
-  * It will provide features that detecting system faults according to metrics data collected by local collectd daemon, and executing recovery commands.
+  * Detects system faults according to metrics data collected by local collectd daemon and executes recovery commands.
 
 ## Prerequisites
 
