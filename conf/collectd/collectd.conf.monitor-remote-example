@@ -17,10 +17,10 @@
         #Password "test-user"
         #Secure false # Use TLS or not
         #CleanSession false
-        #ReconnectInterval 5
         #QoS 2
         #CommandTopic "test-topic"
         #CommandResultTopic "test-result-topic"
+        #ReconnectInterval 5
         #LogLevel "info" # fatal, err, warn, info, debug
         #LogDevice "syslog" # syslog or stdout
     </Module>
