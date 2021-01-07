@@ -18,7 +18,7 @@
 * LuaRocks
 * collectd
   * 以下のカスタマイズ版のcollectdを使用する必要があります:
-    https://github.com/clear-code/collectd/tree/cc-5.12.0-20201124
+    https://github.com/clear-code/collectd/tree/cc-5.12.0-20210107
   * 上記ブランチでは本プラグインで必要な追加のコールバック関数が実装されています。
 * MQTTブローカー
   * [VerneMQ](https://vernemq.com/)で動作確認されています。

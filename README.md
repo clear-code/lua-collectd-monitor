@@ -18,7 +18,7 @@ Following 2 plugins are included:
 * LuaRocks
 * collectd
   * You need to install customized version of collectd:
-    https://github.com/clear-code/collectd/tree/cc-5.12.0-20201124
+    https://github.com/clear-code/collectd/tree/cc-5.12.0-20210107
   * Required additional callback functions are supported in this branch.
 * MQTT Broker
   * [VerneMQ](https://vernemq.com/) is verified
