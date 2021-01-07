@@ -261,5 +261,5 @@ collectd.conf送信および実行結果のメッセージ形式はJSONです。
 * collectdデーモンを起動する
 * syslogを確認し、以下のようなNotificationが発行されていることを確認する
 ```
-Notification: severity = OKAY, host = local, plugin = lua-collectd-monitor-local, plugin_instance = 0, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, type_instance = 0, message = {"message":"Hello World!","task_id":244078840,"code":0}
+Notification: severity = OKAY, host = local, plugin = lua-collectd-monitor-local, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, message = {"message":"Hello World!","task_id":244078840,"code":0}
 ```

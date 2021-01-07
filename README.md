@@ -261,5 +261,5 @@ Here is the defined result codes:
 * Start collectd daemon
 * See your syslog to confirm that a collectd's notification is emitted like this:
 ```
-Notification: severity = OKAY, host = localhost, plugin = lua-collectd-monitor-local, plugin_instance = 0, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, type_instance = 0, message = {"message":"Hello World!","task_id":244078840,"code":0}
+Notification: severity = OKAY, host = localhost, plugin = lua-collectd-monitor-local, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, message = {"message":"Hello World!","task_id":244078840,"code":0}
 ```

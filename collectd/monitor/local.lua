@@ -206,11 +206,11 @@ function emit_notification(handler, task, code, message)
       host = unix.gethostname(),
       message = result_json,
       plugin = PLUGIN_NAME,
-      plugin_instance = "0",
+      plugin_instance = "",
       severity = severity,
       time = os.time(),
       type = cb_name,
-      type_instance = "0",
+      type_instance = "",
       meta = {},
    }
    dispatch_notification(notification)
