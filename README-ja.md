@@ -57,7 +57,7 @@ $ sudo luarocks make
 ```
   * リモート監視機能のより詳細な設定項目については[conf/collectd/collectd.conf.monitor-remote-example](conf/collectd/collectd.conf.monitor-remote-example)を参照
 * [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を/etc/collectd/monitor/config.jsonにコピーし、内容を編集してMQTTブローカーへの接続情報（リモート監視機能を使用する場合）と必要なリカバリコマンドを設定する
-* ローカル監視機能を使用する場合は、Luaで書かれた設定ファイルを任意の名前で/etc/collectd/monitor/local/以下に配置する。ファイル名の拡張子は.luaとする。設定例については[conf/collectd/monitor/local/](conf/collectd/monitor/local/)以下を参照。
+* ローカル監視機能を使用する場合は、Luaで書かれた設定ファイルを任意の名前で/etc/collectd/monitor/local/以下に配置する。ファイル名の拡張子は.luaとする。設定例については[conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua)を参照。
 
 ## リモートコマンド機能
 
