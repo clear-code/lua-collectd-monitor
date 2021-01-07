@@ -1,8 +1,14 @@
+LoadPlugin syslog
 LoadPlugin memory
 
 <LoadPlugin lua>
     Globals true
 </LoadPlugin>
+
+<Plugin syslog>
+    LogLevel info
+    NotifyLevel OKAY
+</Plugin>
 
 <Plugin lua>
     BasePath "/usr/local/share/lua/5.1"
