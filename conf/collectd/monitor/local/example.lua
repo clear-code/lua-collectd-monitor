@@ -25,9 +25,14 @@ local metric_handlers = {
 
       if metric.plugin == "memory" and metric.type_instance == "free" then
          if metric.values[1] <= 10 * 1000 * 1000 * 1000 then
+            -- To execute a commend, return service & command name defined in
+            -- config.json
             return { service = "hello", command = "exec" }
          end
       end
+
+      -- return nil if no need to execute a command
+      return nil
    end,
 
    memory_free_is_over_10GB = function(metric)
@@ -62,8 +67,13 @@ local notification_handlers = {
       -- * https://collectd.org/wiki/index.php/Notification_t
 
       if notification.severity == NOTIF_FAILURE then
+         -- To execute a commend, return service & command name defined in
+         -- config.json
          return { service = "hello", command = "exec" }
       end
+
+      -- return nil if no need to execute a command
+      return nil
    end
 }
 
