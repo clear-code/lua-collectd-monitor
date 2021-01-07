@@ -147,9 +147,9 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 | code       | 数値   | コマンドの終了ステータス |
 
 
-## collectd設定更新機能
+## collectd.confリモート更新機能
 
-### collectd設定更新機能のテスト手順
+### collectd.confリモート更新機能のテスト手順
 
 * collectd.confでcollectd/monitor/remote.luaを有効化する
 * collectdデーモンを起動する
@@ -185,12 +185,12 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 ```
 * 詳細については`luajit ./collectd/monitor/send-config.lua --help`やソースコードを参照のこと
 
-### collectd設定送信機能のメッセージ形式
+### collectd.confリモート更新機能のメッセージ形式
 
-collectd設定送信および実行結果のメッセージ形式はJSONです。
+collectd.conf送信および実行結果のメッセージ形式はJSONです。
 それぞれのメッセージ例とメンバー定義を以下に示します。
 
-#### collectd設定更新メッセージ
+#### collectd.conf更新メッセージ
 
 メッセージ例:
 
@@ -210,7 +210,7 @@ collectd設定送信および実行結果のメッセージ形式はJSONです�
 | timestamp  | 文字列 | タイムスタンプ（ISO8601形式UTC）|
 | config     | 文字列 | 新しいcollectd.confの内容 |
 
-#### 設定更新実行結果メッセージ
+#### collectd.conf更新実行結果メッセージ
 
 メッセージ例:
 
