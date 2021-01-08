@@ -344,7 +344,7 @@ ConfigReplacer.new = function(task_id, options)
    replacer.start_command = function(self)
       if self.options.commands and self.options.commands.start then
          return self.options.commands.start
-      elseif has_systemd_service() then
+      elseif has_systemd_service(self) then
          return "/bin/systemctl start collectd 2>&1"
       else
          local command = self:command_path()
@@ -355,7 +355,7 @@ ConfigReplacer.new = function(task_id, options)
    replacer.stop_command = function(self)
       if self.options.commands and self.options.commands.stop then
          return self.options.commands.stop
-      elseif has_systemd_service() then
+      elseif has_systemd_service(self) then
          return "/bin/systemctl stop collectd 2>&1"
       else
          return "kill " .. collectd_pid(self) .. " 2>&1"
