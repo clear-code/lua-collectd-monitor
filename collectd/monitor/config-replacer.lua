@@ -20,7 +20,13 @@ function sleep(sec)
 end
 
 function collectd_pid(self)
-   local code, output = utils.run_command("/bin/cat " .. self:pid_path() .. " 2>&1")
+   local command, code, output
+   if has_systemd_service(self) then
+      command = "/bin/systemctl show --property MainPID --value collectd 2>&1"
+   else
+      command = "/bin/cat " .. self:pid_path() .. " 2>&1"
+   end
+   code, output = utils.run_command(command)
    if code ~= 0 then
       return nil, output
    end
@@ -245,7 +251,7 @@ end
 function has_systemd_service(self)
    if self.has_systemd_service == nil then
       local code, err = utils.run_command("/bin/systemctl status collectd 2>&1")
-      if code == 0 then
+      if code == 0 or code == 3 then
          self.has_systemd_service = true
       else
          self.has_systemd_service = false
