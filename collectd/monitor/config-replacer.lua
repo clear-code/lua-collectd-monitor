@@ -47,15 +47,6 @@ function remove_file(path)
    return true
 end
 
-function collectd_is_running(self, pid)
-   pid = pid or collectd_pid(self)
-   if not pid then
-      return false
-   end
-   local result = utils.run_command("ps " .. pid .. " > /dev/null 2>&1")
-   return result == 0
-end
-
 function collectd_dry_run(self)
    local command = self:command_path()
    local options = " -T -C " .. self:new_config_path()
