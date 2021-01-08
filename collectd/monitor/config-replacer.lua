@@ -159,7 +159,7 @@ end
 function prepare(self, collectd_config)
    local new_config_path = self:new_config_path()
    if utils.file_exists(new_config_path) then
-      self.result.code = CofnigReplacer.ERROR_LOCK_FILE_EXISTS
+      self.result.code = ConfigReplacer.ERROR_LOCK_FILE_EXISTS
       self.result.message = "Already attempting to replace collectd config!"
       return false, self.result.message
    end
