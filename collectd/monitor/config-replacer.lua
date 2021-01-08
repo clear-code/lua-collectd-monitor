@@ -243,8 +243,15 @@ function abort(self)
 end
 
 function has_systemd_service(self)
-   local code, err = utils.run_command("/bin/systemctl status collectd 2>&1")
-   return code == 0
+   if self.has_systemd_service == nil then
+      local code, err = utils.run_command("/bin/systemctl status collectd 2>&1")
+      if code == 0 then
+         self.has_systemd_service = true
+      else
+         self.has_systemd_service = false
+      end
+   end
+   return self.has_systemd_service
 end
 
 function report(self)
