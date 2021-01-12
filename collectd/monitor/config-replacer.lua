@@ -13,6 +13,7 @@ local ConfigReplacer = {
    ERROR_RECOVERED = 0x2007,
    ERROR_CANNOT_RECOVER = 0x2008,
    ERROR_CANNOT_GET_NEW_PID = 0x2009,
+   ERROR_CANNOT_FIND_PATH = 0x200a,
 }
 
 function sleep(sec)
@@ -242,6 +243,57 @@ function run(self)
    end
 end
 
+function get_lua_path(self)
+   local succeeded, output = utils.run_command("which luajit")
+   if succeeded then
+      return output
+   end
+   local succeeded, output = utils.run_command("which lua")
+   if succeeded then
+      return output
+   end
+   return nil
+end
+
+function run_by_systemd(self)
+   local pl_path = require('pl.path')
+   local pl_stringx = require('pl.stringx')
+   local lua_path = self:lua_path()
+   local script_path = nil
+   local options = "--skip-prepare"
+
+   if not lua_path then
+      return ConfigReplacer.ERROR_CANNOT_FIND_PATH, "Cannot find lua or luajit"
+   end
+
+   for i, path in pairs(pl_stringx.split(package.path, ";")) do
+      if pl_stringx.endswith(path, "?.lua") then
+         path = pl_path.dirname(path) .. "/collectd/monitor/replace-config.lua"
+         if utils.file_exists(path) then
+            script_path = path
+            break
+         end
+      end
+   end
+
+   if not script_path then
+      return ConfigReplacer.ERROR_CANNOT_FIND_PATH, "Cannot find replace-config.lua"
+   end
+
+   options = options .. " --task-id " .. self.task_id
+   if self.options.LogDevice then
+      options = options .. " --log-device " .. self.options.LogDevice
+   else
+      options = options .. " --log-device syslog"
+   end
+   if self.options.LogLevel then
+      options = options .. " --log-level " .. self.options.LogLevel
+   end
+
+   local command = "/bin/systemd-run " .. self:lua_path() .. " " .. script_path .. " " .. options
+   return utils.run_command(command)
+end
+
 function abort(self)
    local new_config_path = self:new_config_path()
    -- TODO: Check a running process
@@ -301,6 +353,7 @@ ConfigReplacer.new = function(task_id, options)
    replacer.prepare = prepare
    replacer.kill_collectd = collectd_stop
    replacer.run = run
+   replacer.run_by_systemd = run_by_systemd
    replacer.abort = abort
    replacer.report = report
    replacer.command_path = function(self)
@@ -336,6 +389,14 @@ ConfigReplacer.new = function(task_id, options)
          return "/opt/collectd/var/run/collectd.pid"
       end
    end
+   replacer.lua_path = function(self)
+      if self.options.LuaPath then
+         return self.options.LuaPath
+      else
+         return get_lua_path(self)
+      end
+   end
+   replacer.is_using_systemd = has_systemd_service
    replacer.report_path = function(self)
       if self.options.ReplacerReportPath then
          return self.options.ReplacerReportPath
@@ -345,6 +406,7 @@ ConfigReplacer.new = function(task_id, options)
          return "/opt/collectd/var/log/collectd-config-replacer.log"
       end
    end
+   replacer.is_using_systemd = has_systemd_service
    replacer.start_command = function(self)
       if self.options.commands and self.options.commands.start then
          return self.options.commands.start

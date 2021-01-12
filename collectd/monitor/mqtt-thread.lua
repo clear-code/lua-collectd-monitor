@@ -241,6 +241,11 @@ function mqtt_thread(monitor_thread_pipe, monitor_config)
          return
       end
 
+      if replacer:is_using_systemd() then
+         replacer:run_by_systemd()
+         return
+      end
+
       local succeeded = replacer:kill_collectd(true)
       if succeeded then
          monitor_thread_pipe:write("run_config_replacer " .. task_id .."\n")
