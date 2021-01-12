@@ -1,3 +1,5 @@
+-- Example of recovery conditions for local.lua plugin
+
 local metric_handlers = {
    memory_free_is_under_10GB = function(metric)
       -- Example of metric:
@@ -77,4 +79,15 @@ local notification_handlers = {
    end
 }
 
+-- Each config files can return 2 types of handlers
+--
+-- * 1st return value: metric_handlers (or a metric_handler)
+--   * A function or a table of functions which are called when a collectd
+--     plugin sends a metric
+--   * Can be nil if you don't want to receive metrics
+--
+-- * 2nd return value: notification_handlers (or a notification_handler)
+--   * A function or a table of functions which are called when a collectd
+--     plugin sends a notification
+--   * Can be nil if you don't want to receive notifications
 return metric_handlers, notification_handlers
