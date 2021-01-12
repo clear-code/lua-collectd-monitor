@@ -109,7 +109,13 @@ function new_client()
 end
 
 mqtt.run_ioloop(new_client())
+local first_retry_time = os.time()
 while args.result_topic and not received do
-   -- connection may closed by broker when collectd is restarted
+   -- The connection may be closed by broker when collectd is restarted.
+   -- Use a new client to reset the state in this case.
    mqtt.run_ioloop(new_client())
+   if os.time() - first_retry_time >= 60 then
+      print("Timed out to receive a reply!")
+      break
+   end
 end
