@@ -104,6 +104,30 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 ```
 * See `luajit ./collectd/monitor/send-command.lua --help` and its source code for more details
 
+### Setting items of config.json
+
+See [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) for an example.
+
+|         Key        |  Type   | Contents |
+|--------------------|---------|----------|
+| Host               | string  | Host name and port of MQTT broker (e.g. `host` or `host:1883`) |
+| User               | string  | Username for authorization on MQTT broker |
+| Password           | string  | Password for authorization on MQTT broker |
+| Secure             | boolean | Use TLS or not to connect to MATT broker |
+| CleanSession       | boolean | MQTT's [Clean Session flag](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Ref362965194) |
+| QoS                | number  | MQTT's [QoS level](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) |
+| CommandTopic       | string  | MQTT topic name for sending commands |
+| CommandResultTopic | string  | MQTT topic name for sending command results |
+| Services           | object  | List of services to define recovery commands (See below) |
+| LogDevice          | string  | Device to outout log (`stdout` or `syslog`) |
+| LogLevel           | string  | Log level (`fatal`, `error`, `warn`, `info`, `debug`) |
+
+Each key of `Services` is a service name and value is a following object:
+
+|   Key    |  Type  | Contents |
+|----------|--------|----------|
+| Commands | Object | List of recovery commands: Each key is a command name and value is a recovery command |
+
 ### The message format of a remote command
 
 Remote command & command result messages are formated in JSON.

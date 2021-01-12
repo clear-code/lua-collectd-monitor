@@ -104,6 +104,30 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 ```
 * 詳細については`luajit ./collectd/monitor/send-command.lua --help`やソースコードを参照のこと
 
+### config.jsonの設定項目
+
+設定例は[conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を参照して下さい。
+
+|        キー        | タイプ | 内容 |
+|--------------------|--------|------|
+| Host               | 文字列 | MQTTブローカーのホスト名およびポート (例: `host` あるいは `host:1883`) |
+| User               | 文字列 | MQTTブローカーでの認証用ユーザー名 |
+| Password           | 文字列 | MQTTブローカーでの認証用パスワード |
+| Secure             | 真偽値 | MQTTブローカーへの接続でTLSを使用するか否か |
+| CleanSession       | 真偽値 | MQTTの[Clean Sessionフラグ](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Ref362965194) |
+| QoS                | 数値   | MQTTの[QoSレベル](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) |
+| CommandTopic       | 文字列 | コマンド送受信用のMQTTトピック名 |
+| CommandResultTopic | 文字列 | コマンド結果送受信用のMQTTトピック名 |
+| Services           | オブジェクト | 障害復旧コマンドを設定するサービスのリスト（後述） |
+| LogDevice          | 文字列 | ログ出力先 (`stdout`あるいは`syslog`) |
+| LogLevel           | 文字列 | ログレベル (`fatal`, `error`, `warn`, `info`, `debug`) |
+
+`Services`の各キーは任意のサービス名、値は以下のオブジェクトです:
+
+|   キー   |    タイプ    | 内容 |
+|----------|--------------|------|
+| Commands | オブジェクト | 復旧コマンドのリスト: 各キーは任意のコマンド名、値は復旧用のコマンド |
+
 ### リモートコマンドのメッセージ形式
 
 リモートコマンドおよび実行結果のメッセージ形式はJSONです。
