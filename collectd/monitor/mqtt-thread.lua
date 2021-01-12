@@ -242,7 +242,12 @@ function mqtt_thread(monitor_thread_pipe, monitor_config)
       end
 
       if replacer:is_using_systemd() then
-         replacer:run_by_systemd()
+         local succeeded = replacer:run_by_systemd()
+         if not succeeded then
+            replacer:abort()
+            error(replacer.result.message)
+            send_reply(task_id, replacer.result.code, replacer.result.message)
+         end
          return
       end
 

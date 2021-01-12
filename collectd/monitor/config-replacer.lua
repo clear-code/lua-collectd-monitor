@@ -263,7 +263,9 @@ function run_by_systemd(self)
    local options = "--skip-prepare"
 
    if not lua_path then
-      return ConfigReplacer.ERROR_CANNOT_FIND_PATH, "Cannot find lua or luajit"
+      self.code = ConfigReplacer.ERROR_CANNOT_FIND_PATH
+      self.result.message = "Cannot find lua or luajit"
+      return false, self.result.message
    end
 
    for i, path in pairs(pl_stringx.split(package.path, ";")) do
@@ -277,7 +279,9 @@ function run_by_systemd(self)
    end
 
    if not script_path then
-      return ConfigReplacer.ERROR_CANNOT_FIND_PATH, "Cannot find replace-config.lua"
+      self.code = ConfigReplacer.ERROR_CANNOT_FIND_PATH
+      self.result.message = "Cannot find replace-config.lua"
+      return false, self.result.message
    end
 
    options = options .. " --task-id " .. self.task_id
@@ -291,7 +295,14 @@ function run_by_systemd(self)
    end
 
    local command = "/bin/systemd-run " .. self:lua_path() .. " " .. script_path .. " " .. options
-   return utils.run_command(command)
+   local code, message = utils.run_command(command)
+   if code == 0 then
+      return true
+   else
+      self.code = ConfigReplacer.ERROR_CANNOT_STOP_COLLECTD
+      self.result.message = message
+      return false, message
+   end
 end
 
 function abort(self)
