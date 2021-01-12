@@ -1,8 +1,16 @@
+# To use this config, you need to build collectd with the configure option
+# "--enable-debug".
+
+LoadPlugin syslog
 LoadPlugin logfile
 LoadPlugin memory
 <LoadPlugin lua>
     Globals true
 </LoadPlugin>
+
+<Plugin syslog>
+    LogLevel debug
+</Plugin>
 
 <Plugin logfile>
     LogLevel debug
