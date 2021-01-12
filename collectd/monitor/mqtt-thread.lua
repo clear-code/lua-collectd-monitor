@@ -228,7 +228,7 @@ function mqtt_thread(monitor_thread_pipe, monitor_config)
    function dispatch_config(task_id, config)
       local replacer = ConfigReplacer.new(task_id, monitor_config)
       local replaceable = replacer:prepare(config)
-      local message
+      local succeeded, message
       if not replaceable then
          if logger.level ~= "DEBUG" and replacer.result.code == ConfigReplacer.ERROR_BROKEN_CONFIG then
             -- Shouln't show detailed message because received collectd.conf may incldue
@@ -242,19 +242,15 @@ function mqtt_thread(monitor_thread_pipe, monitor_config)
       end
 
       if replacer:is_using_systemd() then
-         local succeeded = replacer:run_by_systemd()
-         if not succeeded then
-            replacer:abort()
-            error(replacer.result.message)
-            send_reply(task_id, replacer.result.code, replacer.result.message)
+         succeeded = replacer:run_by_systemd()
+      else
+         succeeded = replacer:kill_collectd(true)
+         if succeeded then
+            monitor_thread_pipe:write("run_config_replacer " .. task_id .."\n")
          end
-         return
       end
 
-      local succeeded = replacer:kill_collectd(true)
-      if succeeded then
-         monitor_thread_pipe:write("run_config_replacer " .. task_id .."\n")
-      else
+      if not succeeded then
          replacer:abort()
          error(replacer.result.message)
          send_reply(task_id, replacer.result.code, replacer.result.message)

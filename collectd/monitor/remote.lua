@@ -73,6 +73,7 @@ collectd.register_init(
    end
 )
 
+-- It's used only when systemd is detected.
 function run_config_replacer(task_id)
    local unix = require('unix')
    local pid = unix.fork()
