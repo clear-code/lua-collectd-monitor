@@ -270,3 +270,33 @@ collectd.conf送信および実行結果のメッセージ形式はJSONです。
 ```
 Notification: severity = OKAY, host = local, plugin = lua-collectd-monitor-local, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, message = {"message":"Hello World!","task_id":244078840,"code":0}
 ```
+
+### 復旧コマンドおよび復旧条件の設定
+
+* 復旧コマンドはリモートコマンド機能と同様にconfig.jsonで予め定義します。記述例は[conf/collectd/monitor/config.json](conf/collectd/monitor/config.json)を参照して下さい。
+* 復旧条件はLuaのコードで記述します。記述例は[conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua)を参照して下さい。
+
+### コマンド実行結果の通知
+
+コマンドの実行結果は上記実行例の通りcollectdの[Notification](https://collectd.org/wiki/index.php/Notification_t)機能で通知されます。collectdのnetworkプラグインを使用することで、リモートホストでも実行結果を受け取ることができます。
+
+Notificationの各フィールドの値は次の通りです。
+
+|   フィールド    | 内容 |
+|-----------------|------|
+| severity        | 4 (NOTIF_OKAY): 成功, 1 (NOTIF_FAILURE): 失敗 |
+| host            | ホスト名 |
+| plugin          | lua-collectd-moitor-local （固定） |
+| plugin_instance | 無し（空文字列） |
+| type            | 復旧コマンドを実行したコールバック名 |
+| type_instance   | 無し（空文字列） |
+| time            | タイムスタンプ（UNIX時間） |
+| message         | 実行結果の詳細（JSON形式） |
+
+`message`の内容は以下の通りです。
+
+| フィールド | タイプ | 内容 |
+|------------|--------|------|
+| task_id    | 数値   | 一意のタスクID |
+| message    | 文字列 | コマンドのメッセージ（標準出力） |
+| code       | 数値   | コマンドの終了ステータス |

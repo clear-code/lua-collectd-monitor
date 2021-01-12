@@ -270,3 +270,35 @@ Here is the defined result codes:
 ```
 Notification: severity = OKAY, host = localhost, plugin = lua-collectd-monitor-local, type = /etc/collectd/monitor/local/example.lua::write::memory_free_is_under_10GB, message = {"message":"Hello World!","task_id":244078840,"code":0}
 ```
+
+### Configuration of recovery commands and trigger conditions
+
+* Recovery commands are pre-defined in config.json as same as remote.lua plugin. Please see [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) for an example.
+* Trigger conditions are written in Lua. Please see [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) for an example.
+
+### Notification of command resutls
+
+Results of commands are notified by collectd's [Notification](https://collectd.org/wiki/index.php/Notification_t) feature. You can receive them at remote hosts too by using collectd's network plugin.
+
+The values of each fields in Notification is following:
+
+|      Field      | Content |
+|-----------------|---------|
+| severity        | `4` (`NOTIF_OKAY`): Success, `1` (`NOTIF_FAILURE`): Fail |
+| host            | Host name |
+| plugin          | lua-collectd-moitor-local (Fixed) |
+| plugin_instance | None (Empty string) |
+| type            | A call back name which executed the command |
+| type_instance   | None (Empty string) |
+| time            | Timestamp (UNIX time) |
+| message         | Detail of the result (JSON format) |
+
+The contents of the `message`:
+
+|   Field    |  Type  | Content |
+|------------|--------|------|
+| task_id    | number | An unique task ID |
+| message    | string | Message of a command (STDOUT) |
+| code       | number | Exit status of a command |
+
+Note that `message` will be omitted if it's too long because max length of `message` field of Notificatoin is 128.
