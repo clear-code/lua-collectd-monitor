@@ -38,22 +38,6 @@ function collectd_pid(self)
    return nil
 end
 
-function rename_file(src, dest)
-   local code, err = utils.run_command("/bin/mv \"" .. src .. "\" \"" .. dest .. "\" 2>&1")
-   if code ~= 0 then
-      return false, err
-   end
-   return true
-end
-
-function remove_file(path)
-   local code, err = utils.run_command("/bin/rm -f \"" .. path .. "\" 2>&1")
-   if code ~= 0 then
-      return false, err
-   end
-   return true
-end
-
 function collectd_dry_run(self)
    local command = self:command_path()
    local options = " -T -C " .. self:new_config_path()
@@ -137,7 +121,7 @@ end
 function recover_old_config(self)
    local message
    self:info("Trying to recover old config ...")
-   local succeeded, err = rename_file(self:old_config_path(), self:config_path())
+   local succeeded, err = os.rename(self:old_config_path(), self:config_path())
    if not succeeded then
       message = "Failed to recover old config file!: " .. err
       self:error(message)
@@ -176,7 +160,7 @@ function prepare(self, collectd_config)
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_BROKEN_CONFIG
       self.result.message = "New config seems broken!: " .. err
-      remove_file(new_config_path)
+      os.remove(new_config_path)
       return false, self.result.message
    end
 
@@ -195,7 +179,7 @@ function run(self)
    end
 
    -- save old config
-   succeeded, err = rename_file(self:config_path(), self:old_config_path())
+   succeeded, err = os.rename(self:config_path(), self:old_config_path())
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_CANNOT_BACKUP_CONFIG
       self.result.message = "Failed to back up old config file!: " .. err
@@ -203,7 +187,7 @@ function run(self)
    end
 
    -- replace the config with new one
-   succeeded, err = rename_file(self:new_config_path(), self:config_path())
+   succeeded, err = os.rename(self:new_config_path(), self:config_path())
    if not succeeded then
       self.result.code = ConfigReplacer.ERROR_CANNOT_REPLACE_CONFIG
       self.result.message = "Failed to replace config file!: " .. err
@@ -308,7 +292,7 @@ end
 function abort(self)
    local new_config_path = self:new_config_path()
    -- TODO: Check a running process
-   remove_file(new_config_path)
+   os.remove(new_config_path)
 end
 
 function has_systemd_service(self)
