@@ -11,27 +11,12 @@
   "Services": {
     "nginx": {
       "commands" : {
-        "restart": "systemctl restart nginx 2>&1"
+        "restart": "/bin/systemctl restart nginx 2>&1"
       }
     },
     "hello": {
       "commands": {
-        "exec": "echo \"Hello World!\""
-      }
-    },
-    "true": {
-      "commands": {
-        "exec": "/bin/true"
-      }
-    },
-    "false": {
-      "commands": {
-        "exec": "/bin/false"
-      }
-    },
-    "no-command": {
-      "commands": {
-        "exec": "/bin/no-command 2>&1"
+        "exec": "/bin/echo \"Hello World!\""
       }
     }
   }
