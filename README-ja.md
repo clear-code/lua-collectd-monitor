@@ -115,7 +115,7 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 | Password           | 文字列 | MQTTブローカーでの認証用パスワード |
 | Secure             | 真偽値 | MQTTブローカーへの接続でTLSを使用するか否か |
 | CleanSession       | 真偽値 | MQTTの[Clean Sessionフラグ](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Ref362965194) |
-| QoS                | 数値   | MQTTの[QoSレベル](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) |
+| QoS                | 数値   | MQTTの[QoSレベル](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) (`0`, `1`, `2`) |
 | CommandTopic       | 文字列 | コマンド送受信用のMQTTトピック名 |
 | CommandResultTopic | 文字列 | コマンド結果送受信用のMQTTトピック名 |
 | Services           | オブジェクト | 障害復旧コマンドを設定するサービスのリスト（後述） |

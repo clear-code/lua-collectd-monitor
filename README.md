@@ -113,9 +113,9 @@ See [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) for a
 | Host               | string  | Host name and port of MQTT broker (e.g. `host` or `host:1883`) |
 | User               | string  | Username for authorization on MQTT broker |
 | Password           | string  | Password for authorization on MQTT broker |
-| Secure             | boolean | Use TLS or not to connect to MATT broker |
+| Secure             | boolean | Use TLS or not to connect to MQTT broker |
 | CleanSession       | boolean | MQTT's [Clean Session flag](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Ref362965194) |
-| QoS                | number  | MQTT's [QoS level](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) |
+| QoS                | number  | MQTT's [QoS level](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html#_Toc442180912) (`0`, `1`, `2`) |
 | CommandTopic       | string  | MQTT topic name for sending commands |
 | CommandResultTopic | string  | MQTT topic name for sending command results |
 | Services           | object  | List of services to define recovery commands (See below) |
