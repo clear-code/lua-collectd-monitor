@@ -229,7 +229,7 @@ function run(self)
       self:debug("collectd has been restarted with PID " .. pid)
       if succeeded then
          self.result.code = ConfigReplacer.SUCCEEDED
-         self.result.message = "Succeeded to replace config."
+         self.result.message = "Succeeded to replace the config."
          return true
       else
          self.result.code = ConfigReplacer.ERROR_RECOVERED
