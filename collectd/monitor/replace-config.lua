@@ -2,7 +2,11 @@
 
 local argparse = require('argparse')
 local parser = argparse("replace-config", "Replace the collectd's config and restart the daemon")
-parser:argument("new_config_path", "A path to collectd's config file")
+parser:argument({
+      name = "new_config_path",
+      description = "A path to collectd's config file",
+      args = "?"
+})
 parser:option("-c --command", "collectd command path", nil)
 parser:option("-C --config", "collectd config path", nil)
 parser:option("-P --pid-file", "collectd pid file path", nil)
@@ -35,6 +39,10 @@ local Replacer = require('collectd/monitor/config-replacer')
 local replacer = Replacer.new(args.task_id, options)
 
 if not args.skip_prepare then
+   if not args.new_config_path then
+      replacer:error("Config path isn't specified!")
+      os.exit(1)
+   end
    local config = new_config(args.new_config_path)
    local replaceable, err = replacer:prepare(config)
    if not replaceable then
