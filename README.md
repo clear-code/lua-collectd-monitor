@@ -310,7 +310,7 @@ The values of each fields in Notification is following:
 |-----------------|---------|
 | severity        | `4` (`NOTIF_OKAY`): Success, `1` (`NOTIF_FAILURE`): Fail |
 | host            | Host name |
-| plugin          | lua-collectd-moitor-local (Fixed) |
+| plugin          | `lua-collectd-moitor-local` (Fixed) |
 | plugin_instance | None (Empty string) |
 | type            | A call back name which executed the command |
 | type_instance   | None (Empty string) |

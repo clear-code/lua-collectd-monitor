@@ -308,9 +308,9 @@ Notificationの各フィールドの値は次の通りです。
 
 |   フィールド    | 内容 |
 |-----------------|------|
-| severity        | 4 (NOTIF_OKAY): 成功, 1 (NOTIF_FAILURE): 失敗 |
+| severity        | `4` (`NOTIF_OKAY`): 成功, `1` (`NOTIF_FAILURE`): 失敗 |
 | host            | ホスト名 |
-| plugin          | lua-collectd-moitor-local （固定） |
+| plugin          | `lua-collectd-moitor-local` （固定） |
 | plugin_instance | 無し（空文字列） |
 | type            | 復旧コマンドを実行したコールバック名 |
 | type_instance   | 無し（空文字列） |
