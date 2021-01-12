@@ -57,7 +57,11 @@ $ sudo luarocks make
   </Module>
 </Plugin>
 ```
-* Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json and edit it to set connection settings to MQTT broker (if you use remote monitoring feature) and define available recovery commands.
+* Configure available recovery commands and connection settings at /etc/collectd/monitor/config.json
+  * Copy [conf/collectd/monitor/config.json](conf/collectd/monitor/config.json) to /etc/collectd/monitor/config.json
+  * Set permission of the file because it may include credentials
+    `chmod 600 /etc/collectd/monitor/config.json`
+  * Edit it to define available recovery commands and to connect to MQTT broker (if you use remote monitoring feature)
 * If you use local monitoring feature, put additional config files written in Lua to /etc/collectd/monitor/local/ with the extension ".lua". See [conf/collectd/monitor/local/example.lua](conf/collectd/monitor/local/example.lua) for examples.
 
 
