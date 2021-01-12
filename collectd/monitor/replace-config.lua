@@ -6,6 +6,10 @@ parser:argument("new_config_path", "A path to collectd's config file")
 parser:option("-c --command", "collectd command path", nil)
 parser:option("-C --config", "collectd config path", nil)
 parser:option("-P --pid-file", "collectd pid file path", nil)
+parser:option("-T --task-id", "A task ID allocated by a caller", 0)
+parser:option("--log-device", "Log device [syslog or stdout]", "stdout")
+parser:option("--log-level", "Log level [err, warn, info, debug]", "info")
+parser:flag("-S --skip-prepare", "Skip preparing a new config")
 local args = parser:parse()
 
 function new_config(path)
@@ -15,10 +19,9 @@ function new_config(path)
    return config
 end
 
-local config = new_config(args.new_config_path)
 local options = {
-   LogDevice = "stdout",
-   LogLevel = "debug",
+   LogDevice = args.log_device,
+   LogLevel = args.log_level,
    Services = {
       collectd = {
          CommandPath = args.command,
@@ -29,15 +32,19 @@ local options = {
 }
 
 local Replacer = require('collectd/monitor/config-replacer')
-local replacer = Replacer.new(0, options)
-local replaceable, err = replacer:prepare(config)
-if not replaceable then
-   replacer:report()
-   os.exit(1)
+local replacer = Replacer.new(args.task_id, options)
+
+if not args.skip_prepare then
+   local config = new_config(args.new_config_path)
+   local replaceable, err = replacer:prepare(config)
+   if not replaceable then
+      replacer:report()
+      os.exit(1)
+   end
 end
 
 if replacer:kill_collectd() then
-   replacer:run()
+   local succeeded, err = replacer:run()
    replacer:report()
    if succeeded then
       os.exit(0)
