@@ -49,6 +49,7 @@ if replacer:kill_collectd() then
    if succeeded then
       os.exit(0)
    else
+      replacer:abort()
       os.exit(1)
    end
 else
