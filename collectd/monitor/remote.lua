@@ -54,9 +54,9 @@ local monitor_thread_func = function(pipe, conf_json, load_path)
       package.path = load_path
    end
 
-   local ret, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf)
+   local succeeded, err = pcall(require('collectd/monitor/mqtt-thread'), pipe, conf)
 
-   if err then
+   if not succeeded then
       local logger = utils.get_logger("collectd-monitor-remote", conf)
       logger:error(err)
    end
