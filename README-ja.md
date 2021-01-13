@@ -16,9 +16,9 @@
 * Lua or LuaJIT
   * LuaJIT 2.1.0-beta3で動作確認しています。
 * LuaRocks
-* collectd
+* collectdのフォーク版
   * 以下のカスタマイズ版のcollectdを使用する必要があります:
-    https://github.com/clear-code/collectd/tree/cc-5.12.0-20210107
+    https://github.com/clear-code/collectd/releases/tag/5.12.0.16.g6e9604f
   * 上記ブランチでは本プラグインで必要な追加のコールバック関数が実装されています。
 * MQTTブローカー
   * [VerneMQ](https://vernemq.com/)で動作確認されています。

@@ -16,10 +16,10 @@ Following 2 plugins are included:
 * Lua or LuaJIT
   * LuaJIT 2.1.0-beta3 is verified
 * LuaRocks
-* collectd
+* Forked version of collectd
   * You need to install customized version of collectd:
-    https://github.com/clear-code/collectd/tree/cc-5.12.0-20210107
-  * Required additional callback functions are supported in this branch.
+    https://github.com/clear-code/collectd/releases/tag/5.12.0.16.g6e9604f
+  * Additional required callback functions are implemented in this branch.
 * MQTT Broker
   * [VerneMQ](https://vernemq.com/) is verified
   * At least 2 topics should be accessible
