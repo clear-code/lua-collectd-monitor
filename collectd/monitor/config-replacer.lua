@@ -364,7 +364,11 @@ ConfigReplacer.new = function(task_id, options)
       if self.options.ConfigPath then
          return self.options.ConfigPath
       elseif utils.file_exists("/usr/sbin/collectd") then
-         return "/etc/collectd.conf"
+         if utils.file_exists("/etc/collectd/collectd.conf") then
+            return "/etc/collectd/collectd.conf"
+         else
+            return "/etc/collectd.conf"
+         end
       elseif utils.file_exists("/opt/collectd/sbin/collectd") then
          return "/opt/collectd/etc/collectd.conf"
       end
