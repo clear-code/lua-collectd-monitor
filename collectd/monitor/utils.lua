@@ -48,16 +48,6 @@ utils.file_exists = function(path)
    end
 end
 
-utils.directory_exists = function(path)
-   local unix = require('unix')
-   local dir, err = unix.stat(path)
-   if err then
-      return false
-   else
-      return unix.S_ISDIR(dir.mode)
-   end
-end
-
 utils.run_command = function(command_line)
    local cmdline = command_line .. "; echo $?"
    local pipe = io.popen(cmdline)
