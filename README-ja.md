@@ -216,6 +216,20 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 ```
 * 詳細については`luajit ./collectd/monitor/send-config.lua --help`やソースコードを参照のこと
 
+### collectd.confのパス設定
+
+collectd.confのパスは、[config.json](conf/collectd/monitor/config.json)に以下を加えることで設定することができます。設定が存在しない場合は自動検出を試みますが、環境によってはうまく検出できないこともあります。
+
+```json
+  "Services": {
+    ...
+    "collectd": {
+      "ConfigPath" : "/path/to/collectd.conf"
+    },
+    ...
+  }
+```
+
 ### collectd.confリモート更新機能のメッセージ形式
 
 collectd.conf送信および実行結果のメッセージ形式はJSONです。

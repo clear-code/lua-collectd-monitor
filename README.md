@@ -216,6 +216,20 @@ Received a result: { -- PUBLISH{qos=2, packet_id=1, dup=false, type=3, payload="
 ```
 * See `luajit ./collectd/monitor/send-config.lua --help` and its source code for more details
 
+### Configuring collectd.conf path
+
+The path of collectd.conf can be configured by adding like the following setting to your [config.json](conf/collectd/monitor/config.json). If this setting isn't exist, lua-collectd-monitor tryies to find it automatically, but it may fail depending environment.
+
+```json
+  "Services": {
+    ...
+    "collectd": {
+      "ConfigPath" : "/path/to/collectd.conf"
+    },
+    ...
+  }
+```
+
 ### The message format of sending collectd.conf
 
 Message to sending collectd.conf & results are formated in JSON.
