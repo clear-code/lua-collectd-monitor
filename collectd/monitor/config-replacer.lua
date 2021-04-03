@@ -178,19 +178,29 @@ function run(self)
       return false, self.result.message
    end
 
+   local config_path = self:config_path()
+   local old_config_path = self:old_config_path()
+   local new_config_path = self:new_config_path()
+
    -- save old config
-   succeeded, err = os.rename(self:config_path(), self:old_config_path())
+   succeeded, err = os.rename(config_path, old_config_path)
    if not succeeded then
+      message = string.format("Failed to back up old config file! (<%s> => <%s>): %s",
+                              config_path, old_config_path, err)
+      self:error(message)
       self.result.code = ConfigReplacer.ERROR_CANNOT_BACKUP_CONFIG
-      self.result.message = "Failed to back up old config file!: " .. err
+      self.result.message = message
       return false, self.result.message
    end
 
    -- replace the config with new one
-   succeeded, err = os.rename(self:new_config_path(), self:config_path())
+   succeeded, err = os.rename(new_config_path, config_path)
    if not succeeded then
+      message = string.format("Failed to replace config file! (%s => %s): %s",
+                              new_config_path, config_path, err)
+      self:error(message)
       self.result.code = ConfigReplacer.ERROR_CANNOT_REPLACE_CONFIG
-      self.result.message = "Failed to replace config file!: " .. err
+      self.result.message = message
       return false, self.result.message
    end
 
